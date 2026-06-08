@@ -36,14 +36,18 @@ export function IncidentNewPage() {
 
 	return (
 		<div className="mx-auto max-w-xl">
-			<Link to="/incidents" className="text-sm text-slate-500 hover:underline">
+			<Link to="/incidents" className="text-sm text-slate-500 hover:underline dark:text-slate-400">
 				← {t('incidents.backToList')}
 			</Link>
-			<h1 className="mt-2 mb-6 text-2xl font-bold text-slate-900">{t('incidents.new')}</h1>
+			<h1 className="mt-2 mb-6 text-2xl font-bold text-slate-900 dark:text-slate-100">{t('incidents.new')}</h1>
 
-			{formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{formError}</div>}
+			{formError && (
+				<div role="alert" className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
+					{formError}
+				</div>
+			)}
 
-			<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6" noValidate>
+			<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900" noValidate>
 				<TextField label={t('form.title')} placeholder={t('form.titlePlaceholder')} {...register('title')} error={errors.title?.message} />
 
 				<div className="grid grid-cols-2 gap-4">
@@ -52,20 +56,24 @@ export function IncidentNewPage() {
 				</div>
 
 				<div className="flex flex-col gap-1">
-					<label htmlFor="description" className="text-sm font-medium text-slate-700">
+					<label htmlFor="description" className="text-sm font-medium text-slate-700 dark:text-slate-300">
 						{t('form.description')}
 					</label>
 					<textarea
 						id="description"
 						rows={4}
 						placeholder={t('form.descriptionPlaceholder')}
-						className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+						className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-slate-700"
 						{...register('description')}
 					/>
-					{errors.description && <span className="text-xs text-red-500">{errors.description.message}</span>}
+					{errors.description && <span className="text-xs text-red-500 dark:text-red-400">{errors.description.message}</span>}
 				</div>
 
-				<button type="submit" disabled={isSubmitting} className="mt-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60">
+				<button
+					type="submit"
+					disabled={isSubmitting}
+					className="mt-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
+				>
 					{isSubmitting ? t('form.creating') : t('form.create')}
 				</button>
 			</form>
@@ -80,8 +88,13 @@ interface SelectFieldProps extends React.SelectHTMLAttributes<HTMLSelectElement>
 
 const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(({ label, options, ...props }, ref) => (
 	<div className="flex flex-col gap-1">
-		<label className="text-sm font-medium text-slate-700">{label}</label>
-		<select ref={ref} className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200" {...props}>
+		<label className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</label>
+		<select
+			ref={ref}
+			aria-label={label}
+			className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-slate-700"
+			{...props}
+		>
 			{options.map((opt) => (
 				<option key={opt} value={opt}>
 					{opt.replace('_', ' ')}
