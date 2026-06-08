@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  REPORTER
+}
+
+enum IncidentType {
+  INCIDENT
+  REQUEST
+  MAINTENANCE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum Status {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  fullName     String
+  role         Role       @default(REPORTER)
+  reported     Incident[] @relation("reporter")
+  assigned     Incident[] @relation("assignee")
+  auditLogs    AuditLog[] @relation("actor")
+  createdAt    DateTime   @default(now())
+}
+
+model Incident {
+  id          String       @id @default(cuid())
+  title       String
+  type        IncidentType @default(INCIDENT)
+  priority    Priority     @default(MEDIUM)
+  status      Status       @default(OPEN)
+  description String?
+  reporter    User         @relation("reporter", fields: [reporterId], references: [id])
+  reporterId  String
+  assignee    User?        @relation("assignee", fields: [assigneeId], references: [id])
+  assigneeId  String?
+  auditLogs   AuditLog[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([reporterId])
+  @@index([status])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  incident   Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  incidentId String
+  actor      User     @relation("actor", fields: [actorId], references: [id])
+  actorId    String
+  field      String
+  oldValue   String?
+  newValue   String?
+  createdAt  DateTime @default(now())
+
+  @@index([incidentId])
+}
