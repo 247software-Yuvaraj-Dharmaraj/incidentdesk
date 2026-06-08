@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: incidentdesk-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && npm start
+    healthCheckPath: /api/health
+    envVars:
+      # Paste your Neon (production) connection string in the Render dashboard.
+      - key: DATABASE_URL
+        sync: false
+      # Render generates a strong secret automatically.
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      # Set to your deployed client URL (e.g. https://incidentdesk.vercel.app).
+      - key: CLIENT_URL
+        sync: false
+      - key: NODE_ENV
+        value: production
