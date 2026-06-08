@@ -1,1 +1,12 @@
 @import 'tailwindcss';
+
+/* Enable `dark:` utilities when an ancestor (or html) has data-theme="dark". */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+html {
+	color-scheme: light dark;
+}
+
+[data-theme='dark'] {
+	color-scheme: dark;
+}

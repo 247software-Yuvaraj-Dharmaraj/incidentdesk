@@ -2,9 +2,13 @@
 	"common": {
 		"appName": "IncidentDesk",
 		"logout": "Cerrar sesión",
-		"loading": "Cargando…"
+		"loading": "Cargando…",
+		"switchToDark": "Cambiar a modo oscuro",
+		"switchToLight": "Cambiar a modo claro",
+		"skipToContent": "Saltar al contenido principal"
 	},
 	"nav": {
+		"primary": "Principal",
 		"dashboard": "Panel",
 		"incidents": "Incidentes"
 	},
