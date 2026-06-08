@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as incidentsApi from '@/api/incidents.api';
-import { type IncidentFilters } from '@/types/incident';
+import { type Incident, type IncidentFilters } from '@/types/incident';
 
 const PAGE_SIZE = 10;
 
@@ -32,6 +32,41 @@ export function useCreateIncident() {
 		mutationFn: incidentsApi.createIncident,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: incidentKeys.all });
+		},
+	});
+}
+
+interface UpdateVars {
+	id: string;
+	payload: incidentsApi.UpdateIncidentPayload;
+}
+
+export function useUpdateIncident() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: ({ id, payload }: UpdateVars) => incidentsApi.updateIncident(id, payload),
+		// Optimistically apply the change to the detail cache, then reconcile.
+		onMutate: async ({ id, payload }) => {
+			const key = incidentKeys.detail(id);
+			await queryClient.cancelQueries({ queryKey: key });
+			const previous = queryClient.getQueryData<Incident>(key);
+			if (previous) {
+				queryClient.setQueryData<Incident>(key, {
+					...previous,
+					...(payload.status ? { status: payload.status } : {}),
+					...(payload.priority ? { priority: payload.priority } : {}),
+				});
+			}
+			return { previous };
+		},
+		onError: (_err, { id }, context) => {
+			if (context?.previous) {
+				queryClient.setQueryData(incidentKeys.detail(id), context.previous);
+			}
+		},
+		onSettled: (_data, _err, { id }) => {
+			queryClient.invalidateQueries({ queryKey: incidentKeys.detail(id) });
+			queryClient.invalidateQueries({ queryKey: ['incidents', 'list'] });
 		},
 	});
 }

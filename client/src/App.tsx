@@ -6,6 +6,7 @@ import { SignupPage } from '@/pages/signup';
 import { DashboardPage } from '@/pages/dashboard';
 import { IncidentsListPage } from '@/pages/incidents-list';
 import { IncidentNewPage } from '@/pages/incident-new';
+import { IncidentDetailPage } from '@/pages/incident-detail';
 
 function App() {
 	return (
@@ -19,6 +20,7 @@ function App() {
 						<Route path="/dashboard" element={<DashboardPage />} />
 						<Route path="/incidents" element={<IncidentsListPage />} />
 						<Route path="/incidents/new" element={<IncidentNewPage />} />
+						<Route path="/incidents/:id" element={<IncidentDetailPage />} />
 					</Route>
 				</Route>
 

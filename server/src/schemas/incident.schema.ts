@@ -8,6 +8,14 @@ export const createIncidentSchema = z.object({
 	description: z.string().max(2000).optional(),
 });
 
+export const updateIncidentSchema = z
+	.object({
+		status: z.nativeEnum(Status).optional(),
+		priority: z.nativeEnum(Priority).optional(),
+		assigneeId: z.string().cuid().nullable().optional(),
+	})
+	.refine((data) => Object.keys(data).length > 0, { message: 'At least one field is required' });
+
 export const listIncidentsQuerySchema = z.object({
 	status: z.nativeEnum(Status).optional(),
 	type: z.nativeEnum(IncidentType).optional(),
@@ -18,4 +26,5 @@ export const listIncidentsQuerySchema = z.object({
 });
 
 export type CreateIncidentInput = z.infer<typeof createIncidentSchema>;
+export type UpdateIncidentInput = z.infer<typeof updateIncidentSchema>;
 export type ListIncidentsQuery = z.infer<typeof listIncidentsQuerySchema>;

@@ -21,3 +21,14 @@ export async function getIncident(id: string): Promise<Incident> {
 	const { data } = await http.get<{ incident: Incident }>(`/incidents/${id}`);
 	return data.incident;
 }
+
+export interface UpdateIncidentPayload {
+	status?: Incident['status'];
+	priority?: Incident['priority'];
+	assigneeId?: string | null;
+}
+
+export async function updateIncident(id: string, payload: UpdateIncidentPayload): Promise<Incident> {
+	const { data } = await http.patch<{ incident: Incident }>(`/incidents/${id}`, payload);
+	return data.incident;
+}

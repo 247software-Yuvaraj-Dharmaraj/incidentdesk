@@ -5,6 +5,7 @@ import { env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
 import authRoutes from './routes/auth.routes.js';
 import incidentRoutes from './routes/incident.routes.js';
+import userRoutes from './routes/user.routes.js';
 
 export function createApp() {
 	const app = express();
@@ -24,6 +25,7 @@ export function createApp() {
 
 	app.use('/api/auth', authRoutes);
 	app.use('/api/incidents', incidentRoutes);
+	app.use('/api/users', userRoutes);
 
 	app.use(notFoundHandler);
 	app.use(errorHandler);

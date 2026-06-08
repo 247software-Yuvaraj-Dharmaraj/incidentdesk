@@ -8,6 +8,15 @@ export interface UserPreview {
 	email: string;
 }
 
+export interface AuditLog {
+	id: string;
+	field: string;
+	oldValue: string | null;
+	newValue: string | null;
+	actor: UserPreview;
+	createdAt: string;
+}
+
 export interface Incident {
 	id: string;
 	title: string;
@@ -19,6 +28,7 @@ export interface Incident {
 	assignee: UserPreview | null;
 	reporterId: string;
 	assigneeId: string | null;
+	auditLogs?: AuditLog[];
 	createdAt: string;
 	updatedAt: string;
 }

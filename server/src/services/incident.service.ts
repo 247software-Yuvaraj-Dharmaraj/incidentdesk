@@ -1,8 +1,9 @@
 import { type Prisma, Role } from '@prisma/client';
 import { ApiError } from '../lib/api-error.js';
 import { type AuthUser } from '../types/auth.js';
-import { type CreateIncidentInput, type ListIncidentsQuery } from '../schemas/incident.schema.js';
-import { createIncident, findIncidentById, listIncidents } from '../repos/incident.repo.js';
+import { type CreateIncidentInput, type ListIncidentsQuery, type UpdateIncidentInput } from '../schemas/incident.schema.js';
+import { type AuditEntry, createIncident, findIncidentById, listIncidents, updateIncident } from '../repos/incident.repo.js';
+import { findUserExists } from '../repos/user.repo.js';
 
 export function createIncidentForUser(input: CreateIncidentInput, user: AuthUser) {
 	return createIncident({
@@ -36,4 +37,42 @@ export async function getIncidentForUser(id: string, user: AuthUser) {
 	}
 
 	return incident;
+}
+
+/** Admin-only. Applies changes and records an audit entry per changed field. */
+export async function updateIncidentByAdmin(id: string, input: UpdateIncidentInput, actor: AuthUser) {
+	const existing = await findIncidentById(id);
+	if (!existing) {
+		throw ApiError.notFound('Incident not found');
+	}
+
+	if (input.assigneeId) {
+		const assignee = await findUserExists(input.assigneeId);
+		if (!assignee) {
+			throw ApiError.badRequest('Assignee does not exist');
+		}
+	}
+
+	const data: Prisma.IncidentUpdateInput = {};
+	const entries: AuditEntry[] = [];
+
+	if (input.status && input.status !== existing.status) {
+		data.status = input.status;
+		entries.push({ field: 'status', oldValue: existing.status, newValue: input.status });
+	}
+	if (input.priority && input.priority !== existing.priority) {
+		data.priority = input.priority;
+		entries.push({ field: 'priority', oldValue: existing.priority, newValue: input.priority });
+	}
+	if (input.assigneeId !== undefined && input.assigneeId !== existing.assigneeId) {
+		data.assignee = input.assigneeId ? { connect: { id: input.assigneeId } } : { disconnect: true };
+		entries.push({ field: 'assignee', oldValue: existing.assigneeId, newValue: input.assigneeId });
+	}
+
+	// Nothing actually changed — return the current state without a no-op audit row.
+	if (entries.length === 0) {
+		return existing;
+	}
+
+	return updateIncident(id, data, actor.id, entries);
 }

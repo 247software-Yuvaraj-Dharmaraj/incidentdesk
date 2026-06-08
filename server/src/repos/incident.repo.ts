@@ -8,12 +8,41 @@ const incidentInclude = {
 	assignee: userPreview,
 } satisfies Prisma.IncidentInclude;
 
+const detailInclude = {
+	reporter: userPreview,
+	assignee: userPreview,
+	auditLogs: {
+		include: { actor: userPreview },
+		orderBy: { createdAt: 'desc' },
+	},
+} satisfies Prisma.IncidentInclude;
+
 export function createIncident(data: Prisma.IncidentCreateInput) {
 	return prisma.incident.create({ data, include: incidentInclude });
 }
 
 export function findIncidentById(id: string) {
-	return prisma.incident.findUnique({ where: { id }, include: incidentInclude });
+	return prisma.incident.findUnique({ where: { id }, include: detailInclude });
+}
+
+export type AuditEntry = {
+	field: string;
+	oldValue: string | null;
+	newValue: string | null;
+};
+
+/** Applies an update and records its audit trail in a single transaction. */
+export function updateIncident(id: string, data: Prisma.IncidentUpdateInput, actorId: string, entries: AuditEntry[]) {
+	return prisma.$transaction(async (tx) => {
+		await tx.incident.update({ where: { id }, data });
+		if (entries.length > 0) {
+			await tx.auditLog.createMany({
+				data: entries.map((entry) => ({ ...entry, incidentId: id, actorId })),
+			});
+		}
+		// Re-read so the returned detail includes the freshly written audit rows.
+		return tx.incident.findUniqueOrThrow({ where: { id }, include: detailInclude });
+	});
 }
 
 interface ListArgs {
