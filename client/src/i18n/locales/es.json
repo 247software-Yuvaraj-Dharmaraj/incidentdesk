@@ -1,0 +1,93 @@
+{
+	"common": {
+		"appName": "IncidentDesk",
+		"logout": "Cerrar sesión",
+		"loading": "Cargando…"
+	},
+	"nav": {
+		"dashboard": "Panel",
+		"incidents": "Incidentes"
+	},
+	"auth": {
+		"welcomeBack": "Bienvenido de nuevo",
+		"signInSubtitle": "Inicia sesión en IncidentDesk",
+		"createAccount": "Crear cuenta",
+		"signUpSubtitle": "Empieza con IncidentDesk",
+		"fullName": "Nombre completo",
+		"email": "Correo electrónico",
+		"password": "Contraseña",
+		"signIn": "Iniciar sesión",
+		"signingIn": "Iniciando sesión…",
+		"signUp": "Registrarse",
+		"creatingAccount": "Creando cuenta…",
+		"noAccount": "¿No tienes cuenta?",
+		"haveAccount": "¿Ya tienes una cuenta?",
+		"loginFailed": "Error al iniciar sesión",
+		"signupFailed": "Error al registrarse"
+	},
+	"dashboard": {
+		"title": "Panel",
+		"welcome": "Bienvenido, {{name}}",
+		"total": "Total",
+		"open": "Abiertos",
+		"inProgress": "En progreso",
+		"resolved": "Resueltos",
+		"viewAll": "Ver todos los incidentes →"
+	},
+	"incidents": {
+		"title": "Incidentes",
+		"subtitle": "Sigue y gestiona incidentes y solicitudes",
+		"new": "Nuevo incidente",
+		"searchPlaceholder": "Buscar por título…",
+		"allStatuses": "Todos los estados",
+		"allTypes": "Todos los tipos",
+		"allPriorities": "Todas las prioridades",
+		"clear": "Limpiar",
+		"noneYet": "Aún no hay incidentes.",
+		"createFirst": "Crea el primero",
+		"noMatch": "Ningún incidente coincide con los filtros.",
+		"loadMore": "Cargar más",
+		"loadFailed": "Error al cargar incidentes.",
+		"tryAgain": "Reintentar",
+		"notFound": "Incidente no encontrado.",
+		"backToList": "Volver a incidentes",
+		"col": {
+			"title": "Título",
+			"type": "Tipo",
+			"priority": "Prioridad",
+			"status": "Estado",
+			"reported": "Reportado"
+		}
+	},
+	"form": {
+		"title": "Título",
+		"titlePlaceholder": "Resumen breve",
+		"type": "Tipo",
+		"priority": "Prioridad",
+		"description": "Descripción",
+		"descriptionPlaceholder": "Detalles opcionales…",
+		"create": "Crear incidente",
+		"creating": "Creando…",
+		"createFailed": "Error al crear el incidente"
+	},
+	"detail": {
+		"type": "Tipo",
+		"reportedBy": "Reportado por",
+		"assignee": "Asignado a",
+		"created": "Creado",
+		"description": "Descripción",
+		"unassigned": "Sin asignar",
+		"adminControls": "Controles de administrador",
+		"status": "Estado",
+		"priority": "Prioridad",
+		"updateFailed": "Error en la actualización — revertido.",
+		"activity": "Actividad",
+		"noActivity": "Aún no hay actividad.",
+		"changeEntry": "{{actor}} cambió {{field}} de {{from}} a {{to}}"
+	},
+	"toast": {
+		"incidentCreated": "Incidente creado",
+		"incidentUpdated": "Incidente actualizado",
+		"updateFailed": "Error en la actualización — cambios revertidos"
+	}
+}

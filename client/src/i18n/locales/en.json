@@ -1,0 +1,93 @@
+{
+	"common": {
+		"appName": "IncidentDesk",
+		"logout": "Log out",
+		"loading": "Loading…"
+	},
+	"nav": {
+		"dashboard": "Dashboard",
+		"incidents": "Incidents"
+	},
+	"auth": {
+		"welcomeBack": "Welcome back",
+		"signInSubtitle": "Sign in to IncidentDesk",
+		"createAccount": "Create account",
+		"signUpSubtitle": "Get started with IncidentDesk",
+		"fullName": "Full name",
+		"email": "Email",
+		"password": "Password",
+		"signIn": "Sign in",
+		"signingIn": "Signing in…",
+		"signUp": "Sign up",
+		"creatingAccount": "Creating account…",
+		"noAccount": "No account?",
+		"haveAccount": "Already have an account?",
+		"loginFailed": "Login failed",
+		"signupFailed": "Sign up failed"
+	},
+	"dashboard": {
+		"title": "Dashboard",
+		"welcome": "Welcome, {{name}}",
+		"total": "Total",
+		"open": "Open",
+		"inProgress": "In progress",
+		"resolved": "Resolved",
+		"viewAll": "View all incidents →"
+	},
+	"incidents": {
+		"title": "Incidents",
+		"subtitle": "Track and manage incidents and requests",
+		"new": "New incident",
+		"searchPlaceholder": "Search by title…",
+		"allStatuses": "All statuses",
+		"allTypes": "All types",
+		"allPriorities": "All priorities",
+		"clear": "Clear",
+		"noneYet": "No incidents yet.",
+		"createFirst": "Create the first one",
+		"noMatch": "No incidents match your filters.",
+		"loadMore": "Load more",
+		"loadFailed": "Failed to load incidents.",
+		"tryAgain": "Try again",
+		"notFound": "Incident not found.",
+		"backToList": "Back to incidents",
+		"col": {
+			"title": "Title",
+			"type": "Type",
+			"priority": "Priority",
+			"status": "Status",
+			"reported": "Reported"
+		}
+	},
+	"form": {
+		"title": "Title",
+		"titlePlaceholder": "Brief summary",
+		"type": "Type",
+		"priority": "Priority",
+		"description": "Description",
+		"descriptionPlaceholder": "Optional details…",
+		"create": "Create incident",
+		"creating": "Creating…",
+		"createFailed": "Failed to create incident"
+	},
+	"detail": {
+		"type": "Type",
+		"reportedBy": "Reported by",
+		"assignee": "Assignee",
+		"created": "Created",
+		"description": "Description",
+		"unassigned": "Unassigned",
+		"adminControls": "Admin controls",
+		"status": "Status",
+		"priority": "Priority",
+		"updateFailed": "Update failed — reverted.",
+		"activity": "Activity",
+		"noActivity": "No activity yet.",
+		"changeEntry": "{{actor}} changed {{field}} from {{from}} to {{to}}"
+	},
+	"toast": {
+		"incidentCreated": "Incident created",
+		"incidentUpdated": "Incident updated",
+		"updateFailed": "Update failed — changes reverted"
+	}
+}

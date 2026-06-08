@@ -1,4 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import i18n from '@/i18n';
 import * as incidentsApi from '@/api/incidents.api';
 import { type Incident, type IncidentFilters } from '@/types/incident';
 
@@ -39,6 +41,7 @@ export function useCreateIncident() {
 		mutationFn: incidentsApi.createIncident,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: incidentKeys.all });
+			toast.success(i18n.t('toast.incidentCreated'));
 		},
 	});
 }
@@ -70,6 +73,10 @@ export function useUpdateIncident() {
 			if (context?.previous) {
 				queryClient.setQueryData(incidentKeys.detail(id), context.previous);
 			}
+			toast.error(i18n.t('toast.updateFailed'));
+		},
+		onSuccess: () => {
+			toast.success(i18n.t('toast.incidentUpdated'));
 		},
 		onSettled: () => {
 			queryClient.invalidateQueries({ queryKey: incidentKeys.all });

@@ -1,9 +1,12 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/auth-context';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 export function AppLayout() {
 	const { user, logout } = useAuth();
 	const navigate = useNavigate();
+	const { t } = useTranslation();
 
 	async function handleLogout() {
 		await logout();
@@ -20,10 +23,10 @@ export function AppLayout() {
 						</Link>
 						<nav className="flex items-center gap-4 text-sm text-slate-600">
 							<Link to="/dashboard" className="hover:text-slate-900">
-								Dashboard
+								{t('nav.dashboard')}
 							</Link>
 							<Link to="/incidents" className="hover:text-slate-900">
-								Incidents
+								{t('nav.incidents')}
 							</Link>
 						</nav>
 					</div>
@@ -31,8 +34,9 @@ export function AppLayout() {
 						<span className="text-sm text-slate-500">
 							{user?.fullName} · <span className="font-medium text-slate-700">{user?.role}</span>
 						</span>
+						<LanguageSwitcher />
 						<button onClick={handleLogout} className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
-							Log out
+							{t('common.logout')}
 						</button>
 					</div>
 				</div>

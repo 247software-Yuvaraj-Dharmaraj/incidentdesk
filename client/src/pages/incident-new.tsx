@@ -2,6 +2,7 @@ import { forwardRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useCreateIncident } from '@/hooks/use-incidents';
 import { getErrorMessage } from '@/api/http';
 import { createIncidentSchema, type CreateIncidentValues } from '@/schemas/incident.schema';
@@ -10,6 +11,7 @@ import { INCIDENT_TYPES, PRIORITIES } from '@/types/incident';
 
 export function IncidentNewPage() {
 	const navigate = useNavigate();
+	const { t } = useTranslation();
 	const createIncident = useCreateIncident();
 	const [formError, setFormError] = useState<string | null>(null);
 
@@ -28,35 +30,35 @@ export function IncidentNewPage() {
 			await createIncident.mutateAsync(values);
 			navigate('/incidents');
 		} catch (err) {
-			setFormError(getErrorMessage(err, 'Failed to create incident'));
+			setFormError(getErrorMessage(err, t('form.createFailed')));
 		}
 	}
 
 	return (
 		<div className="mx-auto max-w-xl">
 			<Link to="/incidents" className="text-sm text-slate-500 hover:underline">
-				← Back to incidents
+				← {t('incidents.backToList')}
 			</Link>
-			<h1 className="mt-2 mb-6 text-2xl font-bold text-slate-900">New incident</h1>
+			<h1 className="mt-2 mb-6 text-2xl font-bold text-slate-900">{t('incidents.new')}</h1>
 
 			{formError && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{formError}</div>}
 
 			<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6" noValidate>
-				<TextField label="Title" placeholder="Brief summary" {...register('title')} error={errors.title?.message} />
+				<TextField label={t('form.title')} placeholder={t('form.titlePlaceholder')} {...register('title')} error={errors.title?.message} />
 
 				<div className="grid grid-cols-2 gap-4">
-					<SelectField label="Type" options={INCIDENT_TYPES} {...register('type')} />
-					<SelectField label="Priority" options={PRIORITIES} {...register('priority')} />
+					<SelectField label={t('form.type')} options={INCIDENT_TYPES} {...register('type')} />
+					<SelectField label={t('form.priority')} options={PRIORITIES} {...register('priority')} />
 				</div>
 
 				<div className="flex flex-col gap-1">
 					<label htmlFor="description" className="text-sm font-medium text-slate-700">
-						Description
+						{t('form.description')}
 					</label>
 					<textarea
 						id="description"
 						rows={4}
-						placeholder="Optional details…"
+						placeholder={t('form.descriptionPlaceholder')}
 						className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
 						{...register('description')}
 					/>
@@ -64,7 +66,7 @@ export function IncidentNewPage() {
 				</div>
 
 				<button type="submit" disabled={isSubmitting} className="mt-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60">
-					{isSubmitting ? 'Creating…' : 'Create incident'}
+					{isSubmitting ? t('form.creating') : t('form.create')}
 				</button>
 			</form>
 		</div>
