@@ -22,7 +22,7 @@ A full-stack incident & request management tracker with role-based access contro
 | Frontend | React, TypeScript, Vite, Tailwind CSS, TanStack Query, React Hook Form, Zod |
 | Backend | Node, Express, TypeScript, Prisma, JWT, Zod |
 | Database | PostgreSQL |
-| Tooling | Vitest, GitHub Actions |
+| Tooling | Vitest, Testing Library, GitHub Actions CI, Docker Compose |
 
 ## Architecture
 
@@ -57,6 +57,26 @@ npm run dev                    # http://localhost:5173
 ```
 
 See [`server/README.md`](./server/README.md) and [`client/README.md`](./client/README.md) for details.
+
+## Run with Docker
+
+The whole stack — PostgreSQL, API, and frontend — runs with one command. nginx serves the client and reverse-proxies `/api` to the server (same-origin, no CORS needed):
+
+```bash
+docker compose up --build
+# → app at http://localhost:8080
+```
+
+Migrations run automatically on server startup. Stop with `docker compose down` (add `-v` to also drop the database volume).
+
+## Testing & CI
+
+```bash
+cd server && npm test     # Vitest + Supertest (middleware, JWT, schemas, HTTP layer)
+cd client && npm test     # Vitest + Testing Library (hooks, components)
+```
+
+GitHub Actions runs typecheck, tests, and build for both packages on every push and pull request (see [`.github/workflows/ci.yml`](./.github/workflows/ci.yml)).
 
 ## Project Structure
 
