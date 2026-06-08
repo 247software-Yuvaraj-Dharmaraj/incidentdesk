@@ -2,8 +2,10 @@
 
 A full-stack incident & request management tracker with role-based access control, built as a production-style demonstration of a modern React + Node + PostgreSQL stack.
 
-> **Live demo:** _coming soon_
+> **Live demo:** https://incidentdesk.vercel.app
 > **Demo logins:** `admin@incidentdesk.dev / Admin123!` · `reporter@incidentdesk.dev / Reporter123!`
+>
+> _The API is hosted on a free tier that sleeps when idle — the first request after a pause may take ~30–60s to wake._
 
 ## Features
 
