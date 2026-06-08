@@ -1,28 +1,27 @@
-import { useEffect, useState } from 'react';
-
-type HealthState = 'checking' | 'ok' | 'error';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { ProtectedRoute } from '@/components/protected-route';
+import { AppLayout } from '@/components/app-layout';
+import { LoginPage } from '@/pages/login';
+import { SignupPage } from '@/pages/signup';
+import { DashboardPage } from '@/pages/dashboard';
 
 function App() {
-	const [health, setHealth] = useState<HealthState>('checking');
-
-	useEffect(() => {
-		fetch(`${import.meta.env.VITE_API_URL}/api/health`)
-			.then((res) => (res.ok ? setHealth('ok') : setHealth('error')))
-			.catch(() => setHealth('error'));
-	}, []);
-
-	const statusColor = health === 'ok' ? 'bg-green-500' : health === 'error' ? 'bg-red-500' : 'bg-yellow-400';
-	const statusText = health === 'ok' ? 'API connected' : health === 'error' ? 'API unreachable' : 'Checking API…';
-
 	return (
-		<div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-slate-50 text-slate-900">
-			<h1 className="text-4xl font-bold tracking-tight">IncidentDesk</h1>
-			<p className="text-slate-500">Incident &amp; request management — work in progress</p>
-			<div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 shadow-sm">
-				<span className={`inline-block h-2.5 w-2.5 rounded-full ${statusColor}`} />
-				<span className="text-sm font-medium">{statusText}</span>
-			</div>
-		</div>
+		<BrowserRouter>
+			<Routes>
+				<Route path="/login" element={<LoginPage />} />
+				<Route path="/signup" element={<SignupPage />} />
+
+				<Route element={<ProtectedRoute />}>
+					<Route element={<AppLayout />}>
+						<Route path="/dashboard" element={<DashboardPage />} />
+					</Route>
+				</Route>
+
+				<Route path="/" element={<Navigate to="/dashboard" replace />} />
+				<Route path="*" element={<Navigate to="/dashboard" replace />} />
+			</Routes>
+		</BrowserRouter>
 	);
 }
 
