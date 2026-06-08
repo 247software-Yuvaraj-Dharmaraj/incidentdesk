@@ -1,5 +1,5 @@
 import { asyncHandler } from '../lib/async-handler.js';
-import { createIncidentForUser, getIncidentForUser, getStatsForUser, listIncidentsForUser, updateIncidentByAdmin } from '../services/incident.service.js';
+import { createIncidentForUser, deleteIncidentByAdmin, getIncidentForUser, getStatsForUser, listIncidentsForUser, updateIncidentByAdmin } from '../services/incident.service.js';
 import { type CreateIncidentInput, type ListIncidentsQuery, type UpdateIncidentInput } from '../schemas/incident.schema.js';
 
 export const listIncidentsHandler = asyncHandler(async (req, res) => {
@@ -25,4 +25,9 @@ export const getIncidentHandler = asyncHandler(async (req, res) => {
 export const updateIncidentHandler = asyncHandler(async (req, res) => {
 	const incident = await updateIncidentByAdmin(req.params.id, req.body as UpdateIncidentInput, req.user!);
 	res.json({ incident });
+});
+
+export const deleteIncidentHandler = asyncHandler(async (req, res) => {
+	await deleteIncidentByAdmin(req.params.id);
+	res.status(204).end();
 });

@@ -2,7 +2,7 @@ import { type Prisma, Role, Status } from '@prisma/client';
 import { ApiError } from '../lib/api-error.js';
 import { type AuthUser } from '../types/auth.js';
 import { type CreateIncidentInput, type ListIncidentsQuery, type UpdateIncidentInput } from '../schemas/incident.schema.js';
-import { type AuditEntry, countIncidentsByStatus, createIncident, findIncidentById, listIncidents, updateIncident } from '../repos/incident.repo.js';
+import { type AuditEntry, countIncidentsByStatus, createIncident, deleteIncidentById, findIncidentById, listIncidents, updateIncident } from '../repos/incident.repo.js';
 import { findUserExists } from '../repos/user.repo.js';
 
 export function createIncidentForUser(input: CreateIncidentInput, user: AuthUser) {
@@ -89,4 +89,13 @@ export async function updateIncidentByAdmin(id: string, input: UpdateIncidentInp
 	}
 
 	return updateIncident(id, data, actor.id, entries);
+}
+
+/** Admin-only. Permanently deletes an incident (audit logs cascade). */
+export async function deleteIncidentByAdmin(id: string) {
+	const existing = await findIncidentById(id);
+	if (!existing) {
+		throw ApiError.notFound('Incident not found');
+	}
+	await deleteIncidentById(id);
 }

@@ -46,6 +46,20 @@ export function useCreateIncident() {
 	});
 }
 
+export function useDeleteIncident() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: incidentsApi.deleteIncident,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: incidentKeys.all });
+			toast.success(i18n.t('toast.incidentDeleted'));
+		},
+		onError: () => {
+			toast.error(i18n.t('toast.deleteFailed'));
+		},
+	});
+}
+
 interface UpdateVars {
 	id: string;
 	payload: incidentsApi.UpdateIncidentPayload;

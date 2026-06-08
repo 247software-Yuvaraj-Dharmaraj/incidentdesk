@@ -5,7 +5,10 @@
 		"loading": "Cargando…",
 		"switchToDark": "Cambiar a modo oscuro",
 		"switchToLight": "Cambiar a modo claro",
-		"skipToContent": "Saltar al contenido principal"
+		"skipToContent": "Saltar al contenido principal",
+		"compactView": "Cambiar a vista compacta",
+		"comfortableView": "Cambiar a vista cómoda",
+		"cancel": "Cancelar"
 	},
 	"nav": {
 		"primary": "Principal",
@@ -87,11 +90,19 @@
 		"updateFailed": "Error en la actualización — revertido.",
 		"activity": "Actividad",
 		"noActivity": "Aún no hay actividad.",
-		"changeEntry": "{{actor}} cambió {{field}} de {{from}} a {{to}}"
+		"changeEntry": "{{actor}} cambió {{field}} de {{from}} a {{to}}",
+		"delete": "Eliminar incidente"
+	},
+	"confirm": {
+		"deleteTitle": "¿Eliminar este incidente?",
+		"deleteMessage": "Esto elimina permanentemente el incidente y su historial de actividad. No se puede deshacer.",
+		"deleteConfirm": "Eliminar"
 	},
 	"toast": {
 		"incidentCreated": "Incidente creado",
 		"incidentUpdated": "Incidente actualizado",
-		"updateFailed": "Error en la actualización — cambios revertidos"
+		"updateFailed": "Error en la actualización — cambios revertidos",
+		"incidentDeleted": "Incidente eliminado",
+		"deleteFailed": "Error al eliminar el incidente"
 	}
 }

@@ -1,20 +1,34 @@
-import { Link, useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useIncident, useUpdateIncident } from '@/hooks/use-incidents';
+import { useDeleteIncident, useIncident, useUpdateIncident } from '@/hooks/use-incidents';
 import { useUsers } from '@/hooks/use-users';
 import { useAuth } from '@/context/auth-context';
 import { StatusBadge, PriorityBadge } from '@/components/badges';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { PRIORITIES, STATUSES } from '@/types/incident';
 
 export function IncidentDetailPage() {
 	const { id = '' } = useParams();
 	const { user } = useAuth();
 	const { t } = useTranslation();
+	const navigate = useNavigate();
 	const isAdmin = user?.role === 'ADMIN';
+	const [confirmOpen, setConfirmOpen] = useState(false);
 
 	const { data: incident, isLoading, isError } = useIncident(id);
 	const { data: users } = useUsers(isAdmin);
 	const update = useUpdateIncident();
+	const remove = useDeleteIncident();
+
+	async function handleDelete() {
+		try {
+			await remove.mutateAsync(id);
+			navigate('/incidents');
+		} catch {
+			setConfirmOpen(false);
+		}
+	}
 
 	if (isLoading) {
 		return <div className="h-40 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" role="status" aria-live="polite" />;
@@ -87,6 +101,16 @@ export function IncidentDetailPage() {
 							{t('detail.updateFailed')}
 						</p>
 					)}
+
+					<div className="mt-6 border-t border-slate-200 pt-4 dark:border-slate-800">
+						<button
+							type="button"
+							onClick={() => setConfirmOpen(true)}
+							className="rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950"
+						>
+							{t('detail.delete')}
+						</button>
+					</div>
 				</div>
 			)}
 
@@ -105,6 +129,17 @@ export function IncidentDetailPage() {
 					<p className="text-sm text-slate-400 dark:text-slate-500">{t('detail.noActivity')}</p>
 				)}
 			</div>
+
+			<ConfirmDialog
+				open={confirmOpen}
+				title={t('confirm.deleteTitle')}
+				message={t('confirm.deleteMessage')}
+				confirmLabel={t('confirm.deleteConfirm')}
+				onConfirm={handleDelete}
+				onCancel={() => setConfirmOpen(false)}
+				loading={remove.isPending}
+				destructive
+			/>
 		</div>
 	);
 }
