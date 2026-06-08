@@ -29,7 +29,7 @@ You can reuse your existing Neon project or create a fresh one for production.
 
 1. Push this repo to your personal GitHub (already done).
 2. In the [Render dashboard](https://render.com) → **New** → **Blueprint**, connect the repo.
-   Render reads `server/render.yaml` and pre-fills the service.
+   Render reads `render.yaml` (repo root) and pre-fills the service.
    *(Or **New → Web Service**, set Root Directory = `server`, Build = `npm install && npx prisma generate && npm run build`, Start = `npx prisma migrate deploy && npm start`.)*
 3. Set environment variables:
    - `DATABASE_URL` → your Neon connection string
