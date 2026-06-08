@@ -51,6 +51,10 @@ interface ListArgs {
 	limit: number;
 }
 
+export function countIncidentsByStatus(where: Prisma.IncidentWhereInput) {
+	return prisma.incident.groupBy({ by: ['status'], where, _count: { _all: true } });
+}
+
 export async function listIncidents({ where, cursor, limit }: ListArgs) {
 	// Fetch one extra row to determine whether another page exists.
 	const rows = await prisma.incident.findMany({

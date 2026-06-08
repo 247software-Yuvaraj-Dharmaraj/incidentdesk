@@ -19,6 +19,13 @@ export function useIncidents(filters: IncidentFilters) {
 	});
 }
 
+export function useIncidentStats() {
+	return useQuery({
+		queryKey: ['incidents', 'stats'],
+		queryFn: incidentsApi.getStats,
+	});
+}
+
 export function useIncident(id: string) {
 	return useQuery({
 		queryKey: incidentKeys.detail(id),
@@ -64,9 +71,8 @@ export function useUpdateIncident() {
 				queryClient.setQueryData(incidentKeys.detail(id), context.previous);
 			}
 		},
-		onSettled: (_data, _err, { id }) => {
-			queryClient.invalidateQueries({ queryKey: incidentKeys.detail(id) });
-			queryClient.invalidateQueries({ queryKey: ['incidents', 'list'] });
+		onSettled: () => {
+			queryClient.invalidateQueries({ queryKey: incidentKeys.all });
 		},
 	});
 }

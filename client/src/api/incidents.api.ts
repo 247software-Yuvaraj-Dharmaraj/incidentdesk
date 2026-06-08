@@ -22,6 +22,16 @@ export async function getIncident(id: string): Promise<Incident> {
 	return data.incident;
 }
 
+export interface IncidentStats {
+	total: number;
+	byStatus: Record<Incident['status'], number>;
+}
+
+export async function getStats(): Promise<IncidentStats> {
+	const { data } = await http.get<IncidentStats>('/incidents/stats');
+	return data;
+}
+
 export interface UpdateIncidentPayload {
 	status?: Incident['status'];
 	priority?: Incident['priority'];

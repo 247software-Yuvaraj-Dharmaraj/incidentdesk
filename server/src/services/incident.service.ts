@@ -1,8 +1,8 @@
-import { type Prisma, Role } from '@prisma/client';
+import { type Prisma, Role, Status } from '@prisma/client';
 import { ApiError } from '../lib/api-error.js';
 import { type AuthUser } from '../types/auth.js';
 import { type CreateIncidentInput, type ListIncidentsQuery, type UpdateIncidentInput } from '../schemas/incident.schema.js';
-import { type AuditEntry, createIncident, findIncidentById, listIncidents, updateIncident } from '../repos/incident.repo.js';
+import { type AuditEntry, countIncidentsByStatus, createIncident, findIncidentById, listIncidents, updateIncident } from '../repos/incident.repo.js';
 import { findUserExists } from '../repos/user.repo.js';
 
 export function createIncidentForUser(input: CreateIncidentInput, user: AuthUser) {
@@ -13,6 +13,20 @@ export function createIncidentForUser(input: CreateIncidentInput, user: AuthUser
 		description: input.description,
 		reporter: { connect: { id: user.id } },
 	});
+}
+
+export async function getStatsForUser(user: AuthUser) {
+	const where: Prisma.IncidentWhereInput = user.role === Role.REPORTER ? { reporterId: user.id } : {};
+	const grouped = await countIncidentsByStatus(where);
+
+	const byStatus: Record<Status, number> = { OPEN: 0, IN_PROGRESS: 0, RESOLVED: 0, CLOSED: 0 };
+	let total = 0;
+	for (const row of grouped) {
+		byStatus[row.status] = row._count._all;
+		total += row._count._all;
+	}
+
+	return { total, byStatus };
 }
 
 export function listIncidentsForUser(query: ListIncidentsQuery, user: AuthUser) {
