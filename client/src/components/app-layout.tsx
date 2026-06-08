@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/auth-context';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { DensityToggle } from '@/components/density-toggle';
 
 export function AppLayout() {
 	const { user, logout } = useAuth();
@@ -38,6 +39,7 @@ export function AppLayout() {
 						<span className="text-sm text-slate-500 dark:text-slate-400">
 							{user?.fullName} · <span className="font-medium text-slate-700 dark:text-slate-300">{user?.role}</span>
 						</span>
+						<DensityToggle />
 						<ThemeToggle />
 						<LanguageSwitcher />
 						<button

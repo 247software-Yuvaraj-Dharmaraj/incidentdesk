@@ -5,7 +5,10 @@
 		"loading": "Loading…",
 		"switchToDark": "Switch to dark mode",
 		"switchToLight": "Switch to light mode",
-		"skipToContent": "Skip to main content"
+		"skipToContent": "Skip to main content",
+		"compactView": "Switch to compact view",
+		"comfortableView": "Switch to comfortable view",
+		"cancel": "Cancel"
 	},
 	"nav": {
 		"primary": "Primary",
@@ -87,11 +90,19 @@
 		"updateFailed": "Update failed — reverted.",
 		"activity": "Activity",
 		"noActivity": "No activity yet.",
-		"changeEntry": "{{actor}} changed {{field}} from {{from}} to {{to}}"
+		"changeEntry": "{{actor}} changed {{field}} from {{from}} to {{to}}",
+		"delete": "Delete incident"
+	},
+	"confirm": {
+		"deleteTitle": "Delete this incident?",
+		"deleteMessage": "This permanently removes the incident and its activity history. This cannot be undone.",
+		"deleteConfirm": "Delete"
 	},
 	"toast": {
 		"incidentCreated": "Incident created",
 		"incidentUpdated": "Incident updated",
-		"updateFailed": "Update failed — changes reverted"
+		"updateFailed": "Update failed — changes reverted",
+		"incidentDeleted": "Incident deleted",
+		"deleteFailed": "Failed to delete incident"
 	}
 }

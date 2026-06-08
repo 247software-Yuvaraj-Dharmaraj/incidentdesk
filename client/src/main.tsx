@@ -5,6 +5,7 @@ import { Toaster } from 'sonner';
 import { queryClient } from '@/lib/query-client';
 import { AuthProvider } from '@/context/auth-context';
 import { ThemeProvider } from '@/context/theme-context';
+import { DensityProvider } from '@/context/density-context';
 import { ErrorBoundary } from '@/components/error-boundary';
 import '@/i18n';
 import './index.css';
@@ -14,12 +15,14 @@ createRoot(document.getElementById('root')!).render(
 	<StrictMode>
 		<ErrorBoundary>
 			<ThemeProvider>
-				<QueryClientProvider client={queryClient}>
-					<AuthProvider>
-						<App />
-						<Toaster position="top-right" richColors />
-					</AuthProvider>
-				</QueryClientProvider>
+				<DensityProvider>
+					<QueryClientProvider client={queryClient}>
+						<AuthProvider>
+							<App />
+							<Toaster position="top-right" richColors />
+						</AuthProvider>
+					</QueryClientProvider>
+				</DensityProvider>
 			</ThemeProvider>
 		</ErrorBoundary>
 	</StrictMode>

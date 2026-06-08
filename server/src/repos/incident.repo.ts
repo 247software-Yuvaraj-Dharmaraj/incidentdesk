@@ -55,6 +55,10 @@ export function countIncidentsByStatus(where: Prisma.IncidentWhereInput) {
 	return prisma.incident.groupBy({ by: ['status'], where, _count: { _all: true } });
 }
 
+export function deleteIncidentById(id: string) {
+	return prisma.incident.delete({ where: { id } });
+}
+
 export async function listIncidents({ where, cursor, limit }: ListArgs) {
 	// Fetch one extra row to determine whether another page exists.
 	const rows = await prisma.incident.findMany({

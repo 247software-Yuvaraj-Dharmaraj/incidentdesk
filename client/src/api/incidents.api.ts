@@ -22,6 +22,10 @@ export async function getIncident(id: string): Promise<Incident> {
 	return data.incident;
 }
 
+export async function deleteIncident(id: string): Promise<void> {
+	await http.delete(`/incidents/${id}`);
+}
+
 export interface IncidentStats {
 	total: number;
 	byStatus: Record<Incident['status'], number>;
