@@ -1,10 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { createColumnHelper } from '@tanstack/react-table';
 import { useIncidents } from '@/hooks/use-incidents';
 import { useDebounce } from '@/hooks/use-debounce';
+import { useAuth } from '@/context/auth-context';
 import { StatusBadge, PriorityBadge } from '@/components/badges';
+import { IncidentBoard } from '@/components/incident-board';
 import { PageHeader } from '@/components/ui/page-header';
 import { DataGrid } from '@/components/ui/data-grid';
 import { Select } from '@/components/ui/select';
@@ -17,8 +19,14 @@ const STATUS_RANK: Record<Status, number> = { OPEN: 0, IN_PROGRESS: 1, RESOLVED:
 const columnHelper = createColumnHelper<Incident>();
 const toOptions = (values: string[]) => values.map((v) => ({ label: v.replace('_', ' '), value: v }));
 
+type View = 'table' | 'board';
+
 export function IncidentsListPage() {
 	const { t } = useTranslation();
+	const { user } = useAuth();
+	const isAdmin = user?.role === 'ADMIN';
+
+	const [view, setView] = useState<View>(() => (localStorage.getItem('incidents-view') === 'board' ? 'board' : 'table'));
 	const [search, setSearch] = useState('');
 	const [status, setStatus] = useState<Status | ''>('');
 	const [type, setType] = useState<IncidentType | ''>('');
@@ -39,6 +47,15 @@ export function IncidentsListPage() {
 	const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useIncidents(filters);
 	const incidents = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
 	const hasFilters = Boolean(debouncedSearch || status || type || priority);
+
+	useEffect(() => {
+		localStorage.setItem('incidents-view', view);
+	}, [view]);
+
+	// The board groups all statuses, so it needs every page loaded.
+	useEffect(() => {
+		if (view === 'board' && hasNextPage && !isFetchingNextPage) fetchNextPage();
+	}, [view, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
 	const columns = useMemo(
 		() => [
@@ -71,9 +88,24 @@ export function IncidentsListPage() {
 				title={t('incidents.title')}
 				subtitle={t('incidents.subtitle')}
 				actions={
-					<Link to="/incidents/new" className={buttonClasses('primary')}>
-						+ {t('incidents.new')}
-					</Link>
+					<>
+						<div className="inline-flex overflow-hidden rounded-lg border border-slate-300 text-sm dark:border-slate-700">
+							{(['table', 'board'] as const).map((v) => (
+								<button
+									key={v}
+									type="button"
+									onClick={() => setView(v)}
+									aria-pressed={view === v}
+									className={`px-3 py-1.5 font-medium transition ${view === v ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+								>
+									{t(v === 'table' ? 'incidents.viewTable' : 'incidents.viewBoard')}
+								</button>
+							))}
+						</div>
+						<Link to="/incidents/new" className={buttonClasses('primary')}>
+							+ {t('incidents.new')}
+						</Link>
+					</>
 				}
 			/>
 
@@ -118,9 +150,9 @@ export function IncidentsListPage() {
 				</div>
 			)}
 
-			{incidents.length > 0 && <DataGrid columns={columns} data={incidents} />}
+			{incidents.length > 0 && (view === 'board' ? <IncidentBoard incidents={incidents} canDrag={isAdmin} /> : <DataGrid columns={columns} data={incidents} />)}
 
-			{hasNextPage && (
+			{view === 'table' && hasNextPage && (
 				<div className="mt-4 text-center">
 					<Button variant="secondary" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
 						{isFetchingNextPage ? t('common.loading') : t('incidents.loadMore')}

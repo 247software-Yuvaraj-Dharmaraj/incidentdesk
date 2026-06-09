@@ -54,6 +54,8 @@
 		"noneYet": "No incidents yet.",
 		"createFirst": "Create the first one",
 		"noMatch": "No incidents match your filters.",
+		"viewTable": "Table",
+		"viewBoard": "Board",
 		"loadMore": "Load more",
 		"loadFailed": "Failed to load incidents.",
 		"tryAgain": "Try again",

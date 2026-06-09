@@ -1,0 +1,77 @@
+import { Link } from 'react-router-dom';
+import { DndContext, KeyboardSensor, PointerSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { useUpdateIncident } from '@/hooks/use-incidents';
+import { PriorityBadge } from '@/components/badges';
+import { STATUSES, type Incident, type Status } from '@/types/incident';
+
+const COLUMN_ACCENT: Record<Status, string> = {
+	OPEN: 'border-t-blue-400 dark:border-t-blue-500',
+	IN_PROGRESS: 'border-t-amber-400 dark:border-t-amber-500',
+	RESOLVED: 'border-t-green-400 dark:border-t-green-500',
+	CLOSED: 'border-t-slate-400 dark:border-t-slate-500',
+};
+
+export function IncidentBoard({ incidents, canDrag }: { incidents: Incident[]; canDrag: boolean }) {
+	const update = useUpdateIncident();
+	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), useSensor(KeyboardSensor));
+
+	function onDragEnd(event: DragEndEvent) {
+		const { active, over } = event;
+		if (!over) return;
+		const newStatus = over.id as Status;
+		const incident = incidents.find((i) => i.id === active.id);
+		if (incident && incident.status !== newStatus) {
+			update.mutate({ id: incident.id, payload: { status: newStatus } });
+		}
+	}
+
+	return (
+		<DndContext sensors={sensors} onDragEnd={onDragEnd}>
+			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+				{STATUSES.map((status) => (
+					<Column key={status} status={status} incidents={incidents.filter((i) => i.status === status)} canDrag={canDrag} />
+				))}
+			</div>
+		</DndContext>
+	);
+}
+
+function Column({ status, incidents, canDrag }: { status: Status; incidents: Incident[]; canDrag: boolean }) {
+	const { setNodeRef, isOver } = useDroppable({ id: status });
+	return (
+		<div
+			ref={setNodeRef}
+			className={`flex min-h-32 flex-col gap-2 rounded-xl border border-t-4 border-slate-200 bg-slate-50 p-3 transition dark:border-slate-800 dark:bg-slate-900/50 ${COLUMN_ACCENT[status]} ${isOver ? 'ring-2 ring-slate-300 dark:ring-slate-600' : ''}`}
+		>
+			<div className="flex items-center justify-between px-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+				<span>{status.replace('_', ' ')}</span>
+				<span className="rounded-full bg-slate-200 px-1.5 text-slate-600 dark:bg-slate-700 dark:text-slate-300">{incidents.length}</span>
+			</div>
+			{incidents.map((incident) => (
+				<Card key={incident.id} incident={incident} canDrag={canDrag} />
+			))}
+		</div>
+	);
+}
+
+function Card({ incident, canDrag }: { incident: Incident; canDrag: boolean }) {
+	const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: incident.id, disabled: !canDrag });
+	const style = transform ? { transform: `translate(${transform.x}px, ${transform.y}px)`, zIndex: 10 } : undefined;
+	return (
+		<div
+			ref={setNodeRef}
+			style={style}
+			{...listeners}
+			{...attributes}
+			className={`rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 ${canDrag ? 'cursor-grab active:cursor-grabbing' : ''} ${isDragging ? 'opacity-50' : ''}`}
+		>
+			<Link to={`/incidents/${incident.id}`} className="block text-sm font-medium text-slate-900 hover:underline dark:text-slate-100" onPointerDown={(e) => e.stopPropagation()}>
+				{incident.title}
+			</Link>
+			<div className="mt-2 flex items-center justify-between">
+				<PriorityBadge priority={incident.priority} />
+				<span className="text-xs text-slate-400 dark:text-slate-500">{incident.type}</span>
+			</div>
+		</div>
+	);
+}

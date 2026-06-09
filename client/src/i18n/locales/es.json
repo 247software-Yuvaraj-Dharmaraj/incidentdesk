@@ -54,6 +54,8 @@
 		"noneYet": "Aún no hay incidentes.",
 		"createFirst": "Crea el primero",
 		"noMatch": "Ningún incidente coincide con los filtros.",
+		"viewTable": "Tabla",
+		"viewBoard": "Tablero",
 		"loadMore": "Cargar más",
 		"loadFailed": "Error al cargar incidentes.",
 		"tryAgain": "Reintentar",
