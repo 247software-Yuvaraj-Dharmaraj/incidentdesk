@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DndContext, KeyboardSensor, PointerSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { useUpdateIncident } from '@/hooks/use-incidents';
@@ -15,6 +16,25 @@ export function IncidentBoard({ incidents, canDrag }: { incidents: Incident[]; c
 	const update = useUpdateIncident();
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), useSensor(KeyboardSensor));
 
+	// Size the board to fill the remaining viewport (multi-column layouts only) so
+	// the columns end at the bottom edge and the page itself never scrolls.
+	const boardRef = useRef<HTMLDivElement>(null);
+	const [boardHeight, setBoardHeight] = useState<number>();
+	useEffect(() => {
+		function recalc() {
+			const isSingleRow = window.matchMedia('(min-width: 1024px)').matches;
+			if (!isSingleRow || !boardRef.current) {
+				setBoardHeight(undefined);
+				return;
+			}
+			const top = boardRef.current.getBoundingClientRect().top;
+			setBoardHeight(window.innerHeight - top - 24);
+		}
+		recalc();
+		window.addEventListener('resize', recalc);
+		return () => window.removeEventListener('resize', recalc);
+	}, []);
+
 	function onDragEnd(event: DragEndEvent) {
 		const { active, over } = event;
 		if (!over) return;
@@ -27,7 +47,7 @@ export function IncidentBoard({ incidents, canDrag }: { incidents: Incident[]; c
 
 	return (
 		<DndContext sensors={sensors} onDragEnd={onDragEnd}>
-			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+			<div ref={boardRef} style={boardHeight ? { height: boardHeight } : undefined} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 				{STATUSES.map((status) => (
 					<Column key={status} status={status} incidents={incidents.filter((i) => i.status === status)} canDrag={canDrag} />
 				))}
@@ -39,7 +59,7 @@ export function IncidentBoard({ incidents, canDrag }: { incidents: Incident[]; c
 function Column({ status, incidents, canDrag }: { status: Status; incidents: Incident[]; canDrag: boolean }) {
 	const { setNodeRef, isOver } = useDroppable({ id: status });
 	return (
-		<div className={`flex h-[calc(100vh-15rem)] flex-col rounded-xl border border-t-4 border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50 ${COLUMN_ACCENT[status]}`}>
+		<div className={`flex max-h-[70vh] min-h-48 flex-col rounded-xl border border-t-4 border-slate-200 bg-slate-50 lg:h-full lg:max-h-none lg:min-h-0 dark:border-slate-800 dark:bg-slate-900/50 ${COLUMN_ACCENT[status]}`}>
 			<div className="flex items-center justify-between px-3 pt-3 pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 				<span>{status.replace('_', ' ')}</span>
 				<span className="rounded-full bg-slate-200 px-1.5 text-slate-600 dark:bg-slate-700 dark:text-slate-300">{incidents.length}</span>
