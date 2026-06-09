@@ -1,4 +1,4 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LogOut } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
@@ -30,13 +30,21 @@ export function AppLayout() {
 						<Link to="/dashboard" className="text-lg font-bold text-slate-900 dark:text-slate-100">
 							IncidentDesk
 						</Link>
-						<nav aria-label={t('nav.primary')} className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-							<Link to="/dashboard" className="hover:text-slate-900 dark:hover:text-slate-100">
-								{t('nav.dashboard')}
-							</Link>
-							<Link to="/incidents" className="hover:text-slate-900 dark:hover:text-slate-100">
-								{t('nav.incidents')}
-							</Link>
+						<nav aria-label={t('nav.primary')} className="flex items-center gap-1 text-sm">
+							{[
+								{ to: '/dashboard', label: t('nav.dashboard') },
+								{ to: '/incidents', label: t('nav.incidents') },
+							].map((item) => (
+								<NavLink
+									key={item.to}
+									to={item.to}
+									className={({ isActive }) =>
+										`rounded-md px-2 py-1 transition ${isActive ? 'bg-slate-100 font-medium text-slate-900 dark:bg-slate-800 dark:text-slate-100' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'}`
+									}
+								>
+									{item.label}
+								</NavLink>
+							))}
 						</nav>
 					</div>
 					<div className="flex items-center gap-4">
