@@ -4,6 +4,7 @@ import { useAuth } from '@/context/auth-context';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { DensityToggle } from '@/components/density-toggle';
+import { Button } from '@/components/ui/button';
 
 export function AppLayout() {
 	const { user, logout } = useAuth();
@@ -42,13 +43,9 @@ export function AppLayout() {
 						<DensityToggle />
 						<ThemeToggle />
 						<LanguageSwitcher />
-						<button
-							type="button"
-							onClick={handleLogout}
-							className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-						>
+						<Button variant="secondary" size="sm" onClick={handleLogout}>
 							{t('common.logout')}
-						</button>
+						</Button>
 					</div>
 				</div>
 			</header>
