@@ -3,7 +3,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { useCreateIncident } from '@/hooks/use-incidents';
+import { useTriage, useTriageEnabled } from '@/hooks/use-triage';
 import { getErrorMessage } from '@/api/http';
 import { createIncidentSchema, type CreateIncidentValues } from '@/schemas/incident.schema';
 import { TextField } from '@/components/ui/text-field';
@@ -18,16 +20,24 @@ export function IncidentNewPage() {
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const createIncident = useCreateIncident();
+	const { data: aiEnabled } = useTriageEnabled();
+	const triage = useTriage();
 	const [formError, setFormError] = useState<string | null>(null);
+	const [aiSummary, setAiSummary] = useState<string | null>(null);
 
 	const {
 		register,
 		handleSubmit,
+		setValue,
+		watch,
+		getValues,
 		formState: { errors, isSubmitting },
 	} = useForm<CreateIncidentValues>({
 		resolver: zodResolver(createIncidentSchema),
 		defaultValues: { type: 'INCIDENT', priority: 'MEDIUM' },
 	});
+
+	const title = watch('title');
 
 	async function onSubmit(values: CreateIncidentValues) {
 		setFormError(null);
@@ -36,6 +46,19 @@ export function IncidentNewPage() {
 			navigate('/incidents');
 		} catch (err) {
 			setFormError(getErrorMessage(err, t('form.createFailed')));
+		}
+	}
+
+	async function handleSuggest() {
+		const { title, description } = getValues();
+		try {
+			const result = await triage.mutateAsync({ title, description });
+			setValue('type', result.type, { shouldValidate: true });
+			setValue('priority', result.priority, { shouldValidate: true });
+			setAiSummary(result.summary);
+			toast.success(t('toast.aiApplied'));
+		} catch {
+			toast.error(t('toast.aiFailed'));
 		}
 	}
 
@@ -52,6 +75,20 @@ export function IncidentNewPage() {
 			}
 		>
 			<TextField label={t('form.title')} placeholder={t('form.titlePlaceholder')} {...register('title')} error={errors.title?.message} />
+
+			{aiEnabled && (
+				<div className="flex flex-col gap-2">
+					<Button type="button" variant="secondary" size="sm" onClick={handleSuggest} disabled={triage.isPending || !title || title.trim().length < 3} className="self-start">
+						{triage.isPending ? t('form.suggesting') : `✨ ${t('form.suggestWithAi')}`}
+					</Button>
+					{aiSummary && (
+						<p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-300">
+							<span className="font-medium text-slate-500 dark:text-slate-400">{t('form.aiSummary')}: </span>
+							{aiSummary}
+						</p>
+					)}
+				</div>
+			)}
 
 			<div className="grid grid-cols-2 gap-4">
 				<Select label={t('form.type')} options={toOptions(INCIDENT_TYPES)} {...register('type')} />
