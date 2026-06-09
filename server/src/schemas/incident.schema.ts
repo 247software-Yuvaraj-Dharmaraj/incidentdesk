@@ -25,6 +25,12 @@ export const listIncidentsQuerySchema = z.object({
 	limit: z.coerce.number().int().min(1).max(50).default(10),
 });
 
+export const triageSchema = z.object({
+	title: z.string().min(3, 'Title must be at least 3 characters').max(140),
+	description: z.string().max(2000).optional(),
+});
+
 export type CreateIncidentInput = z.infer<typeof createIncidentSchema>;
+export type TriageInput = z.infer<typeof triageSchema>;
 export type UpdateIncidentInput = z.infer<typeof updateIncidentSchema>;
 export type ListIncidentsQuery = z.infer<typeof listIncidentsQuerySchema>;

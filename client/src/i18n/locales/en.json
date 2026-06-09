@@ -75,7 +75,10 @@
 		"descriptionPlaceholder": "Optional details…",
 		"create": "Create incident",
 		"creating": "Creating…",
-		"createFailed": "Failed to create incident"
+		"createFailed": "Failed to create incident",
+		"suggestWithAi": "Suggest with AI",
+		"suggesting": "Analyzing…",
+		"aiSummary": "AI summary"
 	},
 	"detail": {
 		"type": "Type",
@@ -103,6 +106,8 @@
 		"incidentUpdated": "Incident updated",
 		"updateFailed": "Update failed — changes reverted",
 		"incidentDeleted": "Incident deleted",
-		"deleteFailed": "Failed to delete incident"
+		"deleteFailed": "Failed to delete incident",
+		"aiApplied": "AI suggestions applied",
+		"aiFailed": "AI suggestion failed"
 	}
 }

@@ -75,7 +75,10 @@
 		"descriptionPlaceholder": "Detalles opcionales…",
 		"create": "Crear incidente",
 		"creating": "Creando…",
-		"createFailed": "Error al crear el incidente"
+		"createFailed": "Error al crear el incidente",
+		"suggestWithAi": "Sugerir con IA",
+		"suggesting": "Analizando…",
+		"aiSummary": "Resumen de IA"
 	},
 	"detail": {
 		"type": "Tipo",
@@ -103,6 +106,8 @@
 		"incidentUpdated": "Incidente actualizado",
 		"updateFailed": "Error en la actualización — cambios revertidos",
 		"incidentDeleted": "Incidente eliminado",
-		"deleteFailed": "Error al eliminar el incidente"
+		"deleteFailed": "Error al eliminar el incidente",
+		"aiApplied": "Sugerencias de IA aplicadas",
+		"aiFailed": "Error en la sugerencia de IA"
 	}
 }

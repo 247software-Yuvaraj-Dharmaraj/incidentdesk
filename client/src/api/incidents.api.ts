@@ -26,6 +26,22 @@ export async function deleteIncident(id: string): Promise<void> {
 	await http.delete(`/incidents/${id}`);
 }
 
+export interface TriageResult {
+	type: Incident['type'];
+	priority: Incident['priority'];
+	summary: string;
+}
+
+export async function getTriageEnabled(): Promise<boolean> {
+	const { data } = await http.get<{ enabled: boolean }>('/incidents/triage/status');
+	return data.enabled;
+}
+
+export async function triageIncident(payload: { title: string; description?: string }): Promise<TriageResult> {
+	const { data } = await http.post<TriageResult>('/incidents/triage', payload);
+	return data;
+}
+
 export interface IncidentStats {
 	total: number;
 	byStatus: Record<Incident['status'], number>;
