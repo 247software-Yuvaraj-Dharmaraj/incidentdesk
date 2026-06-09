@@ -1,8 +1,12 @@
+import { createServer } from 'node:http';
 import { createApp } from './app.js';
 import { env } from './config/env.js';
+import { initRealtime } from './lib/realtime.js';
 
 const app = createApp();
+const server = createServer(app);
+initRealtime(server);
 
-app.listen(env.PORT, () => {
+server.listen(env.PORT, () => {
 	console.log(`🚀 Server running on http://localhost:${env.PORT} [${env.NODE_ENV}]`);
 });
