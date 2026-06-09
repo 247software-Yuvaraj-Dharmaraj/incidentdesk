@@ -27,7 +27,7 @@ export function IncidentBoard({ incidents, canDrag }: { incidents: Incident[]; c
 
 	return (
 		<DndContext sensors={sensors} onDragEnd={onDragEnd}>
-			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+			<div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
 				{STATUSES.map((status) => (
 					<Column key={status} status={status} incidents={incidents.filter((i) => i.status === status)} canDrag={canDrag} />
 				))}
@@ -39,17 +39,17 @@ export function IncidentBoard({ incidents, canDrag }: { incidents: Incident[]; c
 function Column({ status, incidents, canDrag }: { status: Status; incidents: Incident[]; canDrag: boolean }) {
 	const { setNodeRef, isOver } = useDroppable({ id: status });
 	return (
-		<div
-			ref={setNodeRef}
-			className={`flex min-h-32 flex-col gap-2 rounded-xl border border-t-4 border-slate-200 bg-slate-50 p-3 transition dark:border-slate-800 dark:bg-slate-900/50 ${COLUMN_ACCENT[status]} ${isOver ? 'ring-2 ring-slate-300 dark:ring-slate-600' : ''}`}
-		>
-			<div className="flex items-center justify-between px-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+		<div className={`flex max-h-[calc(100vh-15rem)] flex-col rounded-xl border border-t-4 border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50 ${COLUMN_ACCENT[status]}`}>
+			<div className="flex items-center justify-between px-3 pt-3 pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
 				<span>{status.replace('_', ' ')}</span>
 				<span className="rounded-full bg-slate-200 px-1.5 text-slate-600 dark:bg-slate-700 dark:text-slate-300">{incidents.length}</span>
 			</div>
-			{incidents.map((incident) => (
-				<Card key={incident.id} incident={incident} canDrag={canDrag} />
-			))}
+			{/* Only the card list scrolls — the board stays in view even with many cards. */}
+			<div ref={setNodeRef} className={`flex min-h-16 flex-1 flex-col gap-2 overflow-y-auto rounded-b-xl px-3 pb-3 transition ${isOver ? 'ring-2 ring-inset ring-slate-300 dark:ring-slate-600' : ''}`}>
+				{incidents.map((incident) => (
+					<Card key={incident.id} incident={incident} canDrag={canDrag} />
+				))}
+			</div>
 		</div>
 	);
 }

@@ -98,17 +98,18 @@ export function useUpdateIncident() {
 					: old
 			);
 
-			return { prevDetail, prevLists };
+			// Confirm immediately — the UI already reflects the change (optimistic).
+			const toastId = toast.success(i18n.t('toast.incidentUpdated'));
+			return { prevDetail, prevLists, toastId };
 		},
 		onError: (_err, { id }, context) => {
 			if (context?.prevDetail) {
 				queryClient.setQueryData(incidentKeys.detail(id), context.prevDetail);
 			}
 			context?.prevLists?.forEach(([key, data]) => queryClient.setQueryData(key, data));
+			// Replace the optimistic success toast with the failure.
+			if (context?.toastId) toast.dismiss(context.toastId);
 			toast.error(i18n.t('toast.updateFailed'));
-		},
-		onSuccess: () => {
-			toast.success(i18n.t('toast.incidentUpdated'));
 		},
 		onSettled: () => {
 			queryClient.invalidateQueries({ queryKey: incidentKeys.all });
