@@ -67,6 +67,6 @@ export async function triageIncident(input: { title: string; description?: strin
 	return {
 		type: TYPES.includes(parsed.type as IncidentType) ? (parsed.type as IncidentType) : IncidentType.INCIDENT,
 		priority: PRIORITIES.includes(parsed.priority as Priority) ? (parsed.priority as Priority) : Priority.MEDIUM,
-		summary: typeof parsed.summary === 'string' ? parsed.summary.slice(0, 200) : '',
+		summary: typeof parsed.summary === 'string' ? parsed.summary.slice(0, 140) : '',
 	};
 }

@@ -20,11 +20,11 @@ export function ConfirmDialog({ open, title, message, confirmLabel, onConfirm, o
 		if (!open) return;
 		confirmRef.current?.focus();
 		function onKey(e: KeyboardEvent) {
-			if (e.key === 'Escape') onCancel();
+			if (e.key === 'Escape' && !loading) onCancel();
 		}
 		document.addEventListener('keydown', onKey);
 		return () => document.removeEventListener('keydown', onKey);
-	}, [open, onCancel]);
+	}, [open, onCancel, loading]);
 
 	if (!open) return null;
 
@@ -33,7 +33,7 @@ export function ConfirmDialog({ open, title, message, confirmLabel, onConfirm, o
 		: 'bg-slate-900 text-white hover:bg-slate-800 focus-visible:ring-slate-400 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200';
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onCancel}>
+		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => !loading && onCancel()}>
 			<div
 				role="dialog"
 				aria-modal="true"
