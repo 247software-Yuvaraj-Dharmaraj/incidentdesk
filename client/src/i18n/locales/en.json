@@ -9,7 +9,9 @@
 		"live": "Live",
 		"compactView": "Switch to compact view",
 		"comfortableView": "Switch to comfortable view",
-		"cancel": "Cancel"
+		"cancel": "Cancel",
+		"edit": "Edit",
+		"delete": "Delete"
 	},
 	"nav": {
 		"primary": "Primary",
@@ -50,6 +52,7 @@
 		"allStatuses": "All statuses",
 		"allTypes": "All types",
 		"allPriorities": "All priorities",
+		"allAssignees": "All assignees",
 		"clear": "Clear",
 		"noneYet": "No incidents yet.",
 		"createFirst": "Create the first one",
@@ -66,7 +69,8 @@
 			"type": "Type",
 			"priority": "Priority",
 			"status": "Status",
-			"reported": "Reported"
+			"reported": "Reported",
+			"actions": "Actions"
 		}
 	},
 	"form": {
