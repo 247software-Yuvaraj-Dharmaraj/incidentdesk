@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { createColumnHelper } from '@tanstack/react-table';
 import { LayoutGrid, Pencil, Plus, Search, Table2, Trash2 } from 'lucide-react';
@@ -14,6 +14,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { DataGrid } from '@/components/ui/data-grid';
 import { Select } from '@/components/ui/select';
 import { Button, buttonClasses } from '@/components/ui/button';
+import { ActionMenu } from '@/components/ui/action-menu';
 import { INCIDENT_TYPES, PRIORITIES, STATUSES, type Incident, type IncidentFilters, type IncidentType, type Priority, type Status } from '@/types/incident';
 
 const PRIORITY_RANK: Record<Priority, number> = { LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 3 };
@@ -26,6 +27,7 @@ type View = 'table' | 'board';
 
 export function IncidentsListPage() {
 	const { t } = useTranslation();
+	const navigate = useNavigate();
 	const { user } = useAuth();
 	const isAdmin = user?.role === 'ADMIN';
 
@@ -82,33 +84,23 @@ export function IncidentsListPage() {
 				? [
 						columnHelper.display({
 							id: 'actions',
-							header: t('incidents.col.actions'),
+							header: () => <span className="sr-only">{t('incidents.col.actions')}</span>,
 							cell: (info) => (
-								<div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
-									<Link
-										to={`/incidents/${info.row.original.id}`}
-										aria-label={t('common.edit')}
-										title={t('common.edit')}
-										className="rounded-md p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-									>
-										<Pencil className="h-4 w-4" />
-									</Link>
-									<button
-										type="button"
-										onClick={() => setConfirmDeleteId(info.row.original.id)}
-										aria-label={t('common.delete')}
-										title={t('common.delete')}
-										className="rounded-md p-1.5 text-red-500 transition hover:bg-red-50 hover:text-red-700 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none dark:hover:bg-red-950 dark:hover:text-red-400"
-									>
-										<Trash2 className="h-4 w-4" />
-									</button>
+								<div className="flex justify-end">
+									<ActionMenu
+										label={t('incidents.col.actions')}
+										items={[
+											{ key: 'edit', label: t('common.edit'), icon: <Pencil className="h-4 w-4" />, onSelect: () => navigate(`/incidents/${info.row.original.id}`) },
+											{ key: 'delete', label: t('common.delete'), icon: <Trash2 className="h-4 w-4" />, destructive: true, onSelect: () => setConfirmDeleteId(info.row.original.id) },
+										]}
+									/>
 								</div>
 							),
 						}),
 					]
 				: []),
 		],
-		[t, isAdmin]
+		[t, isAdmin, navigate]
 	);
 
 	function clearFilters() {
