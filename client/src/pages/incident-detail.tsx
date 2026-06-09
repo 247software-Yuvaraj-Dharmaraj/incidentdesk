@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 import { useDeleteIncident, useIncident, useUpdateIncident } from '@/hooks/use-incidents';
 import { useUsers } from '@/hooks/use-users';
 import { useAuth } from '@/context/auth-context';
@@ -54,8 +55,9 @@ export function IncidentDetailPage() {
 
 	return (
 		<div className="mx-auto max-w-3xl">
-			<Link to="/incidents" className="text-sm text-slate-500 hover:underline dark:text-slate-400">
-				← {t('incidents.backToList')}
+			<Link to="/incidents" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:underline dark:text-slate-400">
+				<ArrowLeft className="h-4 w-4" />
+				{t('incidents.backToList')}
 			</Link>
 
 			<div className="mt-3 flex items-start justify-between gap-4">
@@ -95,6 +97,7 @@ export function IncidentDetailPage() {
 
 					<div className="mt-6 border-t border-slate-200 pt-4 dark:border-slate-800">
 						<Button variant="danger" size="sm" onClick={() => setConfirmOpen(true)}>
+							<Trash2 className="h-4 w-4" />
 							{t('detail.delete')}
 						</Button>
 					</div>

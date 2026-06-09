@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCreateIncident } from '@/hooks/use-incidents';
 import { useTriage, useTriageEnabled } from '@/hooks/use-triage';
@@ -79,7 +80,8 @@ export function IncidentNewPage() {
 			{aiEnabled && (
 				<div className="flex flex-col gap-2">
 					<Button type="button" variant="secondary" size="sm" onClick={handleSuggest} disabled={triage.isPending || !title || title.trim().length < 3} className="self-start">
-						{triage.isPending ? t('form.suggesting') : `✨ ${t('form.suggestWithAi')}`}
+						<Sparkles className="h-4 w-4" />
+						{triage.isPending ? t('form.suggesting') : t('form.suggestWithAi')}
 					</Button>
 					{aiSummary && (
 						<p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-300">
