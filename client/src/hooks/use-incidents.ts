@@ -1,8 +1,8 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import i18n from '@/i18n';
 import * as incidentsApi from '@/api/incidents.api';
-import { type Incident, type IncidentFilters } from '@/types/incident';
+import { type Incident, type IncidentFilters, type IncidentPage } from '@/types/incident';
 
 const PAGE_SIZE = 10;
 
@@ -69,24 +69,42 @@ export function useUpdateIncident() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: ({ id, payload }: UpdateVars) => incidentsApi.updateIncident(id, payload),
-		// Optimistically apply the change to the detail cache, then reconcile.
+		// Optimistically apply the change to BOTH the detail cache and every list/board
+		// query (so a Kanban drag moves the card instantly), then reconcile on settle.
 		onMutate: async ({ id, payload }) => {
-			const key = incidentKeys.detail(id);
-			await queryClient.cancelQueries({ queryKey: key });
-			const previous = queryClient.getQueryData<Incident>(key);
-			if (previous) {
-				queryClient.setQueryData<Incident>(key, {
-					...previous,
-					...(payload.status ? { status: payload.status } : {}),
-					...(payload.priority ? { priority: payload.priority } : {}),
-				});
+			await queryClient.cancelQueries({ queryKey: incidentKeys.all });
+
+			const patch = {
+				...(payload.status ? { status: payload.status } : {}),
+				...(payload.priority ? { priority: payload.priority } : {}),
+				...(payload.assigneeId !== undefined ? { assigneeId: payload.assigneeId } : {}),
+			};
+
+			const prevDetail = queryClient.getQueryData<Incident>(incidentKeys.detail(id));
+			if (prevDetail) {
+				queryClient.setQueryData<Incident>(incidentKeys.detail(id), { ...prevDetail, ...patch });
 			}
-			return { previous };
+
+			const prevLists = queryClient.getQueriesData<InfiniteData<IncidentPage>>({ queryKey: ['incidents', 'list'] });
+			queryClient.setQueriesData<InfiniteData<IncidentPage>>({ queryKey: ['incidents', 'list'] }, (old) =>
+				old
+					? {
+							...old,
+							pages: old.pages.map((page) => ({
+								...page,
+								items: page.items.map((item) => (item.id === id ? { ...item, ...patch } : item)),
+							})),
+						}
+					: old
+			);
+
+			return { prevDetail, prevLists };
 		},
 		onError: (_err, { id }, context) => {
-			if (context?.previous) {
-				queryClient.setQueryData(incidentKeys.detail(id), context.previous);
+			if (context?.prevDetail) {
+				queryClient.setQueryData(incidentKeys.detail(id), context.prevDetail);
 			}
+			context?.prevLists?.forEach(([key, data]) => queryClient.setQueryData(key, data));
 			toast.error(i18n.t('toast.updateFailed'));
 		},
 		onSuccess: () => {
