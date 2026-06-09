@@ -21,6 +21,8 @@ export const listIncidentsQuerySchema = z.object({
 	type: z.nativeEnum(IncidentType).optional(),
 	priority: z.nativeEnum(Priority).optional(),
 	q: z.string().trim().min(1).optional(),
+	// A user id, or the literal "unassigned" to match incidents with no assignee.
+	assigneeId: z.string().min(1).optional(),
 	cursor: z.string().optional(),
 	limit: z.coerce.number().int().min(1).max(50).default(10),
 });

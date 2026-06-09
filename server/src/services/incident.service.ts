@@ -38,6 +38,7 @@ export function listIncidentsForUser(query: ListIncidentsQuery, user: AuthUser) 
 		...(query.type ? { type: query.type } : {}),
 		...(query.priority ? { priority: query.priority } : {}),
 		...(query.q ? { title: { contains: query.q, mode: 'insensitive' } } : {}),
+		...(query.assigneeId ? { assigneeId: query.assigneeId === 'unassigned' ? null : query.assigneeId } : {}),
 		// Reporters only ever see their own incidents.
 		...(user.role === Role.REPORTER ? { reporterId: user.id } : {}),
 	};

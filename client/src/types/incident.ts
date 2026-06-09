@@ -38,6 +38,7 @@ export interface IncidentFilters {
 	type?: IncidentType;
 	priority?: Priority;
 	q?: string;
+	assigneeId?: string;
 }
 
 export interface IncidentPage {

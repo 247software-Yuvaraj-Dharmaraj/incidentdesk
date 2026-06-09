@@ -9,7 +9,9 @@
 		"live": "En vivo",
 		"compactView": "Cambiar a vista compacta",
 		"comfortableView": "Cambiar a vista cómoda",
-		"cancel": "Cancelar"
+		"cancel": "Cancelar",
+		"edit": "Editar",
+		"delete": "Eliminar"
 	},
 	"nav": {
 		"primary": "Principal",
@@ -50,6 +52,7 @@
 		"allStatuses": "Todos los estados",
 		"allTypes": "Todos los tipos",
 		"allPriorities": "Todas las prioridades",
+		"allAssignees": "Todos los asignados",
 		"clear": "Limpiar",
 		"noneYet": "Aún no hay incidentes.",
 		"createFirst": "Crea el primero",
@@ -66,7 +69,8 @@
 			"type": "Tipo",
 			"priority": "Prioridad",
 			"status": "Estado",
-			"reported": "Reportado"
+			"reported": "Reportado",
+			"actions": "Acciones"
 		}
 	},
 	"form": {

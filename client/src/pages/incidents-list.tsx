@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { createColumnHelper } from '@tanstack/react-table';
-import { useIncidents } from '@/hooks/use-incidents';
+import { useDeleteIncident, useIncidents } from '@/hooks/use-incidents';
 import { useDebounce } from '@/hooks/use-debounce';
+import { useUsers } from '@/hooks/use-users';
 import { useAuth } from '@/context/auth-context';
 import { StatusBadge, PriorityBadge } from '@/components/badges';
 import { IncidentBoard } from '@/components/incident-board';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { PageHeader } from '@/components/ui/page-header';
 import { DataGrid } from '@/components/ui/data-grid';
 import { Select } from '@/components/ui/select';
@@ -31,8 +33,12 @@ export function IncidentsListPage() {
 	const [status, setStatus] = useState<Status | ''>('');
 	const [type, setType] = useState<IncidentType | ''>('');
 	const [priority, setPriority] = useState<Priority | ''>('');
+	const [assigneeId, setAssigneeId] = useState('');
+	const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
 	const debouncedSearch = useDebounce(search, 300);
+	const { data: users } = useUsers(isAdmin);
+	const remove = useDeleteIncident();
 
 	const filters = useMemo<IncidentFilters>(
 		() => ({
@@ -40,19 +46,19 @@ export function IncidentsListPage() {
 			...(status ? { status } : {}),
 			...(type ? { type } : {}),
 			...(priority ? { priority } : {}),
+			...(assigneeId ? { assigneeId } : {}),
 		}),
-		[debouncedSearch, status, type, priority]
+		[debouncedSearch, status, type, priority, assigneeId]
 	);
 
 	const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useIncidents(filters);
 	const incidents = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
-	const hasFilters = Boolean(debouncedSearch || status || type || priority);
+	const hasFilters = Boolean(debouncedSearch || status || type || priority || assigneeId);
 
 	useEffect(() => {
 		localStorage.setItem('incidents-view', view);
 	}, [view]);
 
-	// The board groups all statuses, so it needs every page loaded.
 	useEffect(() => {
 		if (view === 'board' && hasNextPage && !isFetchingNextPage) fetchNextPage();
 	}, [view, hasNextPage, isFetchingNextPage, fetchNextPage]);
@@ -71,8 +77,26 @@ export function IncidentsListPage() {
 			columnHelper.accessor((row) => PRIORITY_RANK[row.priority], { id: 'priority', header: t('incidents.col.priority'), cell: (info) => <PriorityBadge priority={info.row.original.priority} /> }),
 			columnHelper.accessor((row) => STATUS_RANK[row.status], { id: 'status', header: t('incidents.col.status'), cell: (info) => <StatusBadge status={info.row.original.status} /> }),
 			columnHelper.accessor((row) => new Date(row.createdAt).getTime(), { id: 'reported', header: t('incidents.col.reported'), cell: (info) => <span className="text-slate-500 dark:text-slate-400">{new Date(info.row.original.createdAt).toLocaleDateString()}</span> }),
+			...(isAdmin
+				? [
+						columnHelper.display({
+							id: 'actions',
+							header: t('incidents.col.actions'),
+							cell: (info) => (
+								<div className="flex gap-3">
+									<Link to={`/incidents/${info.row.original.id}`} className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100">
+										{t('common.edit')}
+									</Link>
+									<button type="button" onClick={() => setConfirmDeleteId(info.row.original.id)} className="text-sm font-medium text-red-600 hover:text-red-700 focus-visible:underline focus-visible:outline-none dark:text-red-400">
+										{t('common.delete')}
+									</button>
+								</div>
+							),
+						}),
+					]
+				: []),
 		],
-		[t]
+		[t, isAdmin]
 	);
 
 	function clearFilters() {
@@ -80,7 +104,19 @@ export function IncidentsListPage() {
 		setStatus('');
 		setType('');
 		setPriority('');
+		setAssigneeId('');
 	}
+
+	async function handleDelete() {
+		if (!confirmDeleteId) return;
+		try {
+			await remove.mutateAsync(confirmDeleteId);
+		} finally {
+			setConfirmDeleteId(null);
+		}
+	}
+
+	const assigneeOptions = [{ label: t('detail.unassigned'), value: 'unassigned' }, ...(users?.map((u) => ({ label: u.fullName, value: u.id })) ?? [])];
 
 	return (
 		<div>
@@ -121,6 +157,7 @@ export function IncidentsListPage() {
 				<Select value={status} onChange={(e) => setStatus(e.target.value as Status | '')} placeholder={t('incidents.allStatuses')} options={toOptions(STATUSES)} />
 				<Select value={type} onChange={(e) => setType(e.target.value as IncidentType | '')} placeholder={t('incidents.allTypes')} options={toOptions(INCIDENT_TYPES)} />
 				<Select value={priority} onChange={(e) => setPriority(e.target.value as Priority | '')} placeholder={t('incidents.allPriorities')} options={toOptions(PRIORITIES)} />
+				{isAdmin && <Select value={assigneeId} onChange={(e) => setAssigneeId(e.target.value)} placeholder={t('incidents.allAssignees')} options={assigneeOptions} />}
 				{hasFilters && (
 					<Button variant="ghost" size="sm" onClick={clearFilters}>
 						{t('incidents.clear')}
@@ -159,6 +196,17 @@ export function IncidentsListPage() {
 					</Button>
 				</div>
 			)}
+
+			<ConfirmDialog
+				open={confirmDeleteId !== null}
+				title={t('confirm.deleteTitle')}
+				message={t('confirm.deleteMessage')}
+				confirmLabel={t('confirm.deleteConfirm')}
+				onConfirm={handleDelete}
+				onCancel={() => setConfirmDeleteId(null)}
+				loading={remove.isPending}
+				destructive
+			/>
 		</div>
 	);
 }
