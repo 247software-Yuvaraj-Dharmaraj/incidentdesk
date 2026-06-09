@@ -7,6 +7,8 @@ import { useAuth } from '@/context/auth-context';
 import { getErrorMessage } from '@/api/http';
 import { signupSchema, type SignupValues } from '@/schemas/auth.schema';
 import { TextField } from '@/components/ui/text-field';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export function SignupPage() {
 	const { signup } = useAuth();
@@ -31,7 +33,7 @@ export function SignupPage() {
 
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
-			<div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+			<Card className="w-full max-w-sm p-8 shadow-sm">
 				<h1 className="mb-1 text-2xl font-bold text-slate-900 dark:text-slate-100">{t('auth.createAccount')}</h1>
 				<p className="mb-6 text-sm text-slate-500 dark:text-slate-400">{t('auth.signUpSubtitle')}</p>
 
@@ -45,13 +47,9 @@ export function SignupPage() {
 					<TextField label={t('auth.fullName')} autoComplete="name" {...register('fullName')} error={errors.fullName?.message} />
 					<TextField label={t('auth.email')} type="email" autoComplete="email" {...register('email')} error={errors.email?.message} />
 					<TextField label={t('auth.password')} type="password" autoComplete="new-password" {...register('password')} error={errors.password?.message} />
-					<button
-						type="submit"
-						disabled={isSubmitting}
-						className="mt-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
-					>
+					<Button type="submit" disabled={isSubmitting} className="mt-2 w-full">
 						{isSubmitting ? t('auth.creatingAccount') : t('auth.signUp')}
-					</button>
+					</Button>
 				</form>
 
 				<p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
@@ -60,7 +58,7 @@ export function SignupPage() {
 						{t('auth.signIn')}
 					</Link>
 				</p>
-			</div>
+			</Card>
 		</div>
 	);
 }

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/auth-context';
 import { useIncidentStats } from '@/hooks/use-incidents';
+import { Card } from '@/components/ui/card';
 
 const CARDS: { key: 'total' | 'OPEN' | 'IN_PROGRESS' | 'RESOLVED'; labelKey: string; accent: string }[] = [
 	{ key: 'total', labelKey: 'dashboard.total', accent: 'text-slate-900 dark:text-slate-100' },
@@ -29,10 +30,10 @@ export function DashboardPage() {
 
 			<div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
 				{CARDS.map((card) => (
-					<div key={card.key} className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+					<Card key={card.key} className="p-5">
 						<p className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">{t(card.labelKey)}</p>
 						{isLoading ? <div className="mt-2 h-8 w-12 animate-pulse rounded bg-slate-100 dark:bg-slate-800" /> : <p className={`mt-1 text-3xl font-bold ${card.accent}`}>{valueFor(card.key)}</p>}
-					</div>
+					</Card>
 				))}
 			</div>
 

@@ -6,7 +6,12 @@ import { useUsers } from '@/hooks/use-users';
 import { useAuth } from '@/context/auth-context';
 import { StatusBadge, PriorityBadge } from '@/components/badges';
 import { ConfirmDialog } from '@/components/confirm-dialog';
-import { PRIORITIES, STATUSES } from '@/types/incident';
+import { Card } from '@/components/ui/card';
+import { Select } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { PRIORITIES, STATUSES, type Priority, type Status } from '@/types/incident';
+
+const toOptions = (values: string[]) => values.map((v) => ({ label: v.replace('_', ' '), value: v }));
 
 export function IncidentDetailPage() {
 	const { id = '' } = useParams();
@@ -45,6 +50,8 @@ export function IncidentDetailPage() {
 		);
 	}
 
+	const assigneeOptions = [{ label: t('detail.unassigned'), value: '' }, ...(users?.map((u) => ({ label: u.fullName, value: u.id })) ?? [])];
+
 	return (
 		<div className="mx-auto max-w-3xl">
 			<Link to="/incidents" className="text-sm text-slate-500 hover:underline dark:text-slate-400">
@@ -59,42 +66,26 @@ export function IncidentDetailPage() {
 				</div>
 			</div>
 
-			<dl className="mt-6 grid grid-cols-2 gap-4 rounded-xl border border-slate-200 bg-white p-6 text-sm dark:border-slate-800 dark:bg-slate-900">
-				<Field label={t('detail.type')} value={incident.type} />
-				<Field label={t('detail.reportedBy')} value={incident.reporter.fullName} />
-				<Field label={t('detail.assignee')} value={incident.assignee?.fullName ?? t('detail.unassigned')} />
-				<Field label={t('detail.created')} value={new Date(incident.createdAt).toLocaleString()} />
-				<div className="col-span-2">
-					<dt className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">{t('detail.description')}</dt>
-					<dd className="mt-1 text-slate-700 dark:text-slate-300">{incident.description || '—'}</dd>
-				</div>
-			</dl>
+			<Card className="mt-6 p-6">
+				<dl className="grid grid-cols-2 gap-4 text-sm">
+					<Field label={t('detail.type')} value={incident.type} />
+					<Field label={t('detail.reportedBy')} value={incident.reporter.fullName} />
+					<Field label={t('detail.assignee')} value={incident.assignee?.fullName ?? t('detail.unassigned')} />
+					<Field label={t('detail.created')} value={new Date(incident.createdAt).toLocaleString()} />
+					<div className="col-span-2">
+						<dt className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">{t('detail.description')}</dt>
+						<dd className="mt-1 text-slate-700 dark:text-slate-300">{incident.description || '—'}</dd>
+					</div>
+				</dl>
+			</Card>
 
 			{isAdmin && (
-				<div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+				<Card className="mt-6 p-6">
 					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-slate-100">{t('detail.adminControls')}</h2>
 					<div className="grid grid-cols-3 gap-4">
-						<Control label={t('detail.status')} value={incident.status} disabled={update.isPending} onChange={(value) => update.mutate({ id, payload: { status: value as typeof incident.status } })} options={STATUSES} />
-						<Control label={t('detail.priority')} value={incident.priority} disabled={update.isPending} onChange={(value) => update.mutate({ id, payload: { priority: value as typeof incident.priority } })} options={PRIORITIES} />
-						<div className="flex flex-col gap-1">
-							<label htmlFor="assignee-select" className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">
-								{t('detail.assignee')}
-							</label>
-							<select
-								id="assignee-select"
-								value={incident.assigneeId ?? ''}
-								disabled={update.isPending}
-								onChange={(e) => update.mutate({ id, payload: { assigneeId: e.target.value || null } })}
-								className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-slate-700"
-							>
-								<option value="">{t('detail.unassigned')}</option>
-								{users?.map((u) => (
-									<option key={u.id} value={u.id}>
-										{u.fullName}
-									</option>
-								))}
-							</select>
-						</div>
+						<Select label={t('detail.status')} value={incident.status} disabled={update.isPending} options={toOptions(STATUSES)} onChange={(e) => update.mutate({ id, payload: { status: e.target.value as Status } })} />
+						<Select label={t('detail.priority')} value={incident.priority} disabled={update.isPending} options={toOptions(PRIORITIES)} onChange={(e) => update.mutate({ id, payload: { priority: e.target.value as Priority } })} />
+						<Select label={t('detail.assignee')} value={incident.assigneeId ?? ''} disabled={update.isPending} options={assigneeOptions} onChange={(e) => update.mutate({ id, payload: { assigneeId: e.target.value || null } })} />
 					</div>
 					{update.isError && (
 						<p role="alert" className="mt-3 text-sm text-red-500 dark:text-red-400">
@@ -103,15 +94,11 @@ export function IncidentDetailPage() {
 					)}
 
 					<div className="mt-6 border-t border-slate-200 pt-4 dark:border-slate-800">
-						<button
-							type="button"
-							onClick={() => setConfirmOpen(true)}
-							className="rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950"
-						>
+						<Button variant="danger" size="sm" onClick={() => setConfirmOpen(true)}>
 							{t('detail.delete')}
-						</button>
+						</Button>
 					</div>
-				</div>
+				</Card>
 			)}
 
 			<div className="mt-6">
@@ -149,35 +136,6 @@ function Field({ label, value }: { label: string; value: string }) {
 		<div>
 			<dt className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">{label}</dt>
 			<dd className="mt-1 text-slate-700 dark:text-slate-300">{value}</dd>
-		</div>
-	);
-}
-
-interface ControlProps {
-	label: string;
-	value: string;
-	options: string[];
-	disabled: boolean;
-	onChange: (value: string) => void;
-}
-
-function Control({ label, value, options, disabled, onChange }: ControlProps) {
-	return (
-		<div className="flex flex-col gap-1">
-			<label className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">{label}</label>
-			<select
-				value={value}
-				disabled={disabled}
-				onChange={(e) => onChange(e.target.value)}
-				aria-label={label}
-				className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-slate-700"
-			>
-				{options.map((opt) => (
-					<option key={opt} value={opt}>
-						{opt.replace('_', ' ')}
-					</option>
-				))}
-			</select>
 		</div>
 	);
 }
