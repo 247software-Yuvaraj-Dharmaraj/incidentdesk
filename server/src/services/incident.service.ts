@@ -4,15 +4,18 @@ import { type AuthUser } from '../types/auth.js';
 import { type CreateIncidentInput, type ListIncidentsQuery, type UpdateIncidentInput } from '../schemas/incident.schema.js';
 import { type AuditEntry, countIncidentsByStatus, createIncident, deleteIncidentById, findIncidentById, listIncidents, updateIncident } from '../repos/incident.repo.js';
 import { findUserExists } from '../repos/user.repo.js';
+import { emitIncidentsChanged } from '../lib/realtime.js';
 
-export function createIncidentForUser(input: CreateIncidentInput, user: AuthUser) {
-	return createIncident({
+export async function createIncidentForUser(input: CreateIncidentInput, user: AuthUser) {
+	const incident = await createIncident({
 		title: input.title,
 		type: input.type,
 		priority: input.priority,
 		description: input.description,
 		reporter: { connect: { id: user.id } },
 	});
+	emitIncidentsChanged();
+	return incident;
 }
 
 export async function getStatsForUser(user: AuthUser) {
@@ -88,7 +91,9 @@ export async function updateIncidentByAdmin(id: string, input: UpdateIncidentInp
 		return existing;
 	}
 
-	return updateIncident(id, data, actor.id, entries);
+	const updated = await updateIncident(id, data, actor.id, entries);
+	emitIncidentsChanged();
+	return updated;
 }
 
 /** Admin-only. Permanently deletes an incident (audit logs cascade). */
@@ -98,4 +103,5 @@ export async function deleteIncidentByAdmin(id: string) {
 		throw ApiError.notFound('Incident not found');
 	}
 	await deleteIncidentById(id);
+	emitIncidentsChanged();
 }

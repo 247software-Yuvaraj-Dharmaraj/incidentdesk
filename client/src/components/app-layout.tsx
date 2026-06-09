@@ -1,6 +1,7 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/auth-context';
+import { useRealtime } from '@/hooks/use-realtime';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { DensityToggle } from '@/components/density-toggle';
@@ -10,6 +11,7 @@ export function AppLayout() {
 	const { user, logout } = useAuth();
 	const navigate = useNavigate();
 	const { t } = useTranslation();
+	const { connected } = useRealtime();
 
 	async function handleLogout() {
 		await logout();
@@ -37,6 +39,15 @@ export function AppLayout() {
 						</nav>
 					</div>
 					<div className="flex items-center gap-4">
+						{connected && (
+							<span className="flex items-center gap-1.5 text-xs font-medium text-green-600 dark:text-green-400" title={t('common.live')}>
+								<span className="relative flex h-2 w-2">
+									<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
+									<span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+								</span>
+								{t('common.live')}
+							</span>
+						)}
 						<span className="text-sm text-slate-500 dark:text-slate-400">
 							{user?.fullName} · <span className="font-medium text-slate-700 dark:text-slate-300">{user?.role}</span>
 						</span>
