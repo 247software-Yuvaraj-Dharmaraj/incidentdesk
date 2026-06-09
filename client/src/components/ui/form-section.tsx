@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 interface FormSectionProps {
@@ -16,8 +17,9 @@ export function FormSection({ title, backTo, error, onSubmit, children, footer }
 	return (
 		<div className="mx-auto max-w-xl">
 			{backTo && (
-				<Link to={backTo.href} className="text-sm text-slate-500 hover:underline dark:text-slate-400">
-					← {backTo.label}
+				<Link to={backTo.href} className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:underline dark:text-slate-400">
+					<ArrowLeft className="h-4 w-4" />
+					{backTo.label}
 				</Link>
 			)}
 			<h1 className="mt-2 mb-6 text-2xl font-bold text-slate-900 dark:text-slate-100">{title}</h1>

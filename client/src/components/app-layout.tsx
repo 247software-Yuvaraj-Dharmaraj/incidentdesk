@@ -1,5 +1,6 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { LogOut } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 import { useRealtime } from '@/hooks/use-realtime';
 import { LanguageSwitcher } from '@/components/language-switcher';
@@ -55,6 +56,7 @@ export function AppLayout() {
 						<ThemeToggle />
 						<LanguageSwitcher />
 						<Button variant="secondary" size="sm" onClick={handleLogout}>
+							<LogOut className="h-4 w-4" />
 							{t('common.logout')}
 						</Button>
 					</div>

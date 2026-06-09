@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { createColumnHelper } from '@tanstack/react-table';
+import { LayoutGrid, Pencil, Plus, Search, Table2, Trash2 } from 'lucide-react';
 import { useDeleteIncident, useIncidents } from '@/hooks/use-incidents';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useUsers } from '@/hooks/use-users';
@@ -83,12 +84,23 @@ export function IncidentsListPage() {
 							id: 'actions',
 							header: t('incidents.col.actions'),
 							cell: (info) => (
-								<div className="flex gap-3">
-									<Link to={`/incidents/${info.row.original.id}`} className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100">
-										{t('common.edit')}
+								<div className="flex gap-1">
+									<Link
+										to={`/incidents/${info.row.original.id}`}
+										aria-label={t('common.edit')}
+										title={t('common.edit')}
+										className="rounded-md p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+									>
+										<Pencil className="h-4 w-4" />
 									</Link>
-									<button type="button" onClick={() => setConfirmDeleteId(info.row.original.id)} className="text-sm font-medium text-red-600 hover:text-red-700 focus-visible:underline focus-visible:outline-none dark:text-red-400">
-										{t('common.delete')}
+									<button
+										type="button"
+										onClick={() => setConfirmDeleteId(info.row.original.id)}
+										aria-label={t('common.delete')}
+										title={t('common.delete')}
+										className="rounded-md p-1.5 text-red-500 transition hover:bg-red-50 hover:text-red-700 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none dark:hover:bg-red-950 dark:hover:text-red-400"
+									>
+										<Trash2 className="h-4 w-4" />
 									</button>
 								</div>
 							),
@@ -126,34 +138,42 @@ export function IncidentsListPage() {
 				actions={
 					<>
 						<div className="inline-flex overflow-hidden rounded-lg border border-slate-300 text-sm dark:border-slate-700">
-							{(['table', 'board'] as const).map((v) => (
-								<button
-									key={v}
-									type="button"
-									onClick={() => setView(v)}
-									aria-pressed={view === v}
-									className={`px-3 py-1.5 font-medium transition ${view === v ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
-								>
-									{t(v === 'table' ? 'incidents.viewTable' : 'incidents.viewBoard')}
-								</button>
-							))}
+							{(['table', 'board'] as const).map((v) => {
+								const Icon = v === 'table' ? Table2 : LayoutGrid;
+								return (
+									<button
+										key={v}
+										type="button"
+										onClick={() => setView(v)}
+										aria-pressed={view === v}
+										className={`flex items-center gap-1.5 px-3 py-1.5 font-medium transition ${view === v ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+									>
+										<Icon className="h-4 w-4" />
+										{t(v === 'table' ? 'incidents.viewTable' : 'incidents.viewBoard')}
+									</button>
+								);
+							})}
 						</div>
 						<Link to="/incidents/new" className={buttonClasses('primary')}>
-							+ {t('incidents.new')}
+							<Plus className="h-4 w-4" />
+							{t('incidents.new')}
 						</Link>
 					</>
 				}
 			/>
 
 			<div className="mb-4 flex flex-wrap items-center gap-3">
-				<input
-					type="search"
-					value={search}
-					onChange={(e) => setSearch(e.target.value)}
-					placeholder={t('incidents.searchPlaceholder')}
-					aria-label={t('incidents.searchPlaceholder')}
-					className="min-w-48 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-slate-700"
-				/>
+				<div className="relative min-w-48 flex-1">
+					<Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+					<input
+						type="search"
+						value={search}
+						onChange={(e) => setSearch(e.target.value)}
+						placeholder={t('incidents.searchPlaceholder')}
+						aria-label={t('incidents.searchPlaceholder')}
+						className="w-full rounded-lg border border-slate-300 bg-white py-2 pr-3 pl-9 text-sm text-slate-900 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-slate-700"
+					/>
+				</div>
 				<Select value={status} onChange={(e) => setStatus(e.target.value as Status | '')} placeholder={t('incidents.allStatuses')} options={toOptions(STATUSES)} />
 				<Select value={type} onChange={(e) => setType(e.target.value as IncidentType | '')} placeholder={t('incidents.allTypes')} options={toOptions(INCIDENT_TYPES)} />
 				<Select value={priority} onChange={(e) => setPriority(e.target.value as Priority | '')} placeholder={t('incidents.allPriorities')} options={toOptions(PRIORITIES)} />
