@@ -55,7 +55,7 @@ export function DataGrid<T>({ columns, data, minWidth = '640px' }: DataGridProps
 				</thead>
 				<tbody className="divide-y divide-slate-100 dark:divide-slate-800">
 					{table.getRowModel().rows.map((row) => (
-						<tr key={row.id} className="group transition hover:bg-slate-50 dark:hover:bg-slate-800/50">
+						<tr key={row.id} className="transition hover:bg-slate-50 dark:hover:bg-slate-800/50">
 							{row.getVisibleCells().map((cell) => (
 								<td key={cell.id} className={cellPad}>
 									{flexRender(cell.column.columnDef.cell, cell.getContext())}

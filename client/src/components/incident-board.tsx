@@ -27,8 +27,10 @@ export function IncidentBoard({ incidents, canDrag }: { incidents: Incident[]; c
 				setBoardHeight(undefined);
 				return;
 			}
+			// Subtract the board's top offset plus the page's bottom padding (main has py-8 = 32px)
+			// so the columns end inside the viewport and the page itself never scrolls.
 			const top = boardRef.current.getBoundingClientRect().top;
-			setBoardHeight(window.innerHeight - top - 24);
+			setBoardHeight(window.innerHeight - top - 36);
 		}
 		recalc();
 		window.addEventListener('resize', recalc);
