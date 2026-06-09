@@ -69,7 +69,7 @@ export function IncidentsListPage() {
 			columnHelper.accessor('title', {
 				header: t('incidents.col.title'),
 				cell: (info) => (
-					<Link to={`/incidents/${info.row.original.id}`} className="font-medium text-slate-900 hover:underline dark:text-slate-100">
+					<Link to={`/incidents/${info.row.original.id}`} title={info.getValue()} className="block max-w-xs truncate font-medium text-slate-900 hover:underline dark:text-slate-100">
 						{info.getValue()}
 					</Link>
 				),
@@ -84,7 +84,7 @@ export function IncidentsListPage() {
 							id: 'actions',
 							header: t('incidents.col.actions'),
 							cell: (info) => (
-								<div className="flex gap-1">
+								<div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
 									<Link
 										to={`/incidents/${info.row.original.id}`}
 										aria-label={t('common.edit')}
@@ -211,7 +211,7 @@ export function IncidentsListPage() {
 
 			{view === 'table' && hasNextPage && (
 				<div className="mt-4 text-center">
-					<Button variant="secondary" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+					<Button variant="secondary" onClick={() => fetchNextPage()} loading={isFetchingNextPage}>
 						{isFetchingNextPage ? t('common.loading') : t('incidents.loadMore')}
 					</Button>
 				</div>
@@ -233,9 +233,16 @@ export function IncidentsListPage() {
 
 function SkeletonRows() {
 	return (
-		<div className="space-y-2" role="status" aria-live="polite">
-			{Array.from({ length: 5 }).map((_, i) => (
-				<div key={i} className="h-12 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
+		<div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900" role="status" aria-live="polite" aria-busy="true">
+			<div className="h-10 border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50" />
+			{Array.from({ length: 6 }).map((_, i) => (
+				<div key={i} className="flex items-center gap-4 border-b border-slate-100 px-4 py-3.5 last:border-0 dark:border-slate-800">
+					<div className="h-4 flex-1 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
+					<div className="h-4 w-16 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
+					<div className="h-5 w-20 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
+					<div className="h-5 w-20 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
+					<div className="h-4 w-24 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
+				</div>
 			))}
 		</div>
 	);

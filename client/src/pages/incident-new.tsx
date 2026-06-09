@@ -70,7 +70,7 @@ export function IncidentNewPage() {
 			error={formError}
 			onSubmit={handleSubmit(onSubmit)}
 			footer={
-				<Button type="submit" disabled={isSubmitting}>
+				<Button type="submit" loading={isSubmitting}>
 					{isSubmitting ? t('form.creating') : t('form.create')}
 				</Button>
 			}

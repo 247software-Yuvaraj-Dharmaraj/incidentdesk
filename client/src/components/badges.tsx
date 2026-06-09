@@ -14,12 +14,17 @@ const priorityStyles: Record<Priority, string> = {
 	CRITICAL: 'bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-950 dark:text-red-300 dark:ring-red-400/30',
 };
 
-function Pill({ label, className }: { label: string; className: string }) {
-	return <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${className}`}>{label.replace('_', ' ')}</span>;
+function Pill({ label, className, dot = false }: { label: string; className: string; dot?: boolean }) {
+	return (
+		<span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${className}`}>
+			{dot && <span className="h-1.5 w-1.5 rounded-full bg-current opacity-80" aria-hidden="true" />}
+			{label.replace('_', ' ')}
+		</span>
+	);
 }
 
 export function StatusBadge({ status }: { status: Status }) {
-	return <Pill label={status} className={statusStyles[status]} />;
+	return <Pill label={status} className={statusStyles[status]} dot />;
 }
 
 export function PriorityBadge({ priority }: { priority: Priority }) {

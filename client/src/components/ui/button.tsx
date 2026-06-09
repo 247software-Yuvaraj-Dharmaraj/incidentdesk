@@ -1,4 +1,5 @@
 import { forwardRef, type ButtonHTMLAttributes } from 'react';
+import { Loader2 } from 'lucide-react';
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
 type Size = 'sm' | 'md';
@@ -20,6 +21,7 @@ const sizes: Record<Size, string> = {
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	variant?: Variant;
 	size?: Size;
+	loading?: boolean;
 }
 
 /** Shared class string so links can be styled as buttons too. */
@@ -28,8 +30,11 @@ export function buttonClasses(variant: Variant = 'primary', size: Size = 'md', c
 	return `${base} ${variants[variant]} ${sizes[size]} ${className}`.trim();
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({ variant = 'primary', size = 'md', className, type = 'button', ...props }, ref) => (
-	<button ref={ref} type={type} className={buttonClasses(variant, size, className)} {...props} />
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({ variant = 'primary', size = 'md', className, type = 'button', loading = false, disabled, children, ...props }, ref) => (
+	<button ref={ref} type={type} className={buttonClasses(variant, size, className)} disabled={disabled || loading} aria-busy={loading || undefined} {...props}>
+		{loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+		{children}
+	</button>
 ));
 
 Button.displayName = 'Button';
