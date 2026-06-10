@@ -10,6 +10,27 @@
 	--color-brand-fg: #ffffff;
 }
 
+/* Gentle pulse for the branded loader logo. */
+@keyframes id-logo-pulse {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.55;
+		transform: scale(0.9);
+	}
+}
+.id-logo-pulse {
+	animation: id-logo-pulse 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+	.id-logo-pulse {
+		animation: none;
+	}
+}
+
 /* Tailwind v4's Preflight sets buttons to cursor:default. Restore the pointer
    cursor on interactive elements (skipping disabled ones). */
 @layer base {
