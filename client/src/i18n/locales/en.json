@@ -11,7 +11,9 @@
 		"comfortableView": "Switch to comfortable view",
 		"cancel": "Cancel",
 		"edit": "Edit",
-		"delete": "Delete"
+		"delete": "Delete",
+		"selected": "selected",
+		"clear": "Clear"
 	},
 	"nav": {
 		"primary": "Primary",
@@ -79,7 +81,10 @@
 		},
 		"overdue": "Overdue",
 		"overdueOnly": "Overdue only",
-		"showing": "Showing {{shown}} of {{total}}"
+		"showing": "Showing {{shown}} of {{total}}",
+		"export": "Export",
+		"bulkStatus": "Set status…",
+		"bulkAssign": "Assign…"
 	},
 	"form": {
 		"title": "Title",
@@ -122,7 +127,8 @@
 	"confirm": {
 		"deleteTitle": "Delete this incident?",
 		"deleteMessage": "This permanently removes the incident and its activity history. This cannot be undone.",
-		"deleteConfirm": "Delete"
+		"deleteConfirm": "Delete",
+		"bulkDeleteMessage": "Delete {{count}} selected incident(s)? This cannot be undone."
 	},
 	"toast": {
 		"incidentCreated": "Incident created",
@@ -133,7 +139,9 @@
 		"aiApplied": "AI suggestions applied",
 		"aiFailed": "AI suggestion failed",
 		"updateConflict": "This incident was changed elsewhere — refreshing.",
-		"commentFailed": "Couldn't post comment"
+		"commentFailed": "Couldn't post comment",
+		"bulkUpdated": "{{count}} incident(s) updated",
+		"bulkDeleted": "{{count}} incident(s) deleted"
 	},
 	"comments": {
 		"title": "Comments",

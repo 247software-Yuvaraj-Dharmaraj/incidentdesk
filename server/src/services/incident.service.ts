@@ -2,8 +2,8 @@ import { type Prisma, Role, Status } from '@prisma/client';
 import { ApiError } from '../lib/api-error.js';
 import { canTransition } from '../lib/incident-status.js';
 import { type AuthUser } from '../types/auth.js';
-import { type CreateIncidentInput, type ListIncidentsQuery, type UpdateIncidentInput } from '../schemas/incident.schema.js';
-import { type AuditEntry, countIncidentsByStatus, createIncident, deleteIncidentById, findIncidentById, findResolvedTimings, findTimingsSince, listIncidents, updateIncident } from '../repos/incident.repo.js';
+import { type BulkDeleteInput, type BulkUpdateInput, type CreateIncidentInput, type ListIncidentsQuery, type UpdateIncidentInput } from '../schemas/incident.schema.js';
+import { type AuditEntry, countIncidentsByStatus, createIncident, deleteIncidentById, deleteIncidentsByIds, findIncidentById, findResolvedTimings, findTimingsSince, listIncidents, updateIncident } from '../repos/incident.repo.js';
 import { createComment, listComments } from '../repos/comment.repo.js';
 import { findUserExists } from '../repos/user.repo.js';
 import { emitIncidentsChanged } from '../lib/realtime.js';
@@ -180,4 +180,34 @@ export async function deleteIncidentByAdmin(id: string) {
 	}
 	await deleteIncidentById(id);
 	emitIncidentsChanged();
+}
+
+/** Admin-only. Applies one change set to many incidents, skipping ones whose status transition is disallowed. */
+export async function bulkUpdateByAdmin(input: BulkUpdateInput, actor: AuthUser) {
+	const { ids, ...patch } = input;
+	if (patch.assigneeId) {
+		const assignee = await findUserExists(patch.assigneeId);
+		if (!assignee) throw ApiError.badRequest('Assignee does not exist');
+	}
+
+	let updated = 0;
+	let skipped = 0;
+	for (const id of ids) {
+		try {
+			await updateIncidentByAdmin(id, patch, actor);
+			updated += 1;
+		} catch {
+			// e.g. a disallowed status transition for this particular incident — skip it.
+			skipped += 1;
+		}
+	}
+	emitIncidentsChanged();
+	return { updated, skipped };
+}
+
+/** Admin-only. Permanently deletes many incidents. */
+export async function bulkDeleteByAdmin(input: BulkDeleteInput) {
+	const { count } = await deleteIncidentsByIds(input.ids);
+	emitIncidentsChanged();
+	return { deleted: count };
 }

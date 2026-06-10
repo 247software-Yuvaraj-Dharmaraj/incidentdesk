@@ -59,6 +59,10 @@ export function deleteIncidentById(id: string) {
 	return prisma.incident.delete({ where: { id } });
 }
 
+export function deleteIncidentsByIds(ids: string[]) {
+	return prisma.incident.deleteMany({ where: { id: { in: ids } } });
+}
+
 export async function listIncidents({ where, cursor, limit }: ListArgs) {
 	// Fetch one extra row to determine whether another page exists; count the full
 	// filtered set in parallel so the UI can show "showing N of total".

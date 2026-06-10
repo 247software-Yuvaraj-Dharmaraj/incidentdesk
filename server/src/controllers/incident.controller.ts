@@ -1,8 +1,8 @@
 import { asyncHandler } from '../lib/async-handler.js';
-import { addCommentForIncident, createIncidentForUser, deleteIncidentByAdmin, getIncidentForUser, getMetricsForUser, getStatsForUser, listCommentsForIncident, listIncidentsForUser, updateIncidentByAdmin } from '../services/incident.service.js';
+import { addCommentForIncident, bulkDeleteByAdmin, bulkUpdateByAdmin, createIncidentForUser, deleteIncidentByAdmin, getIncidentForUser, getMetricsForUser, getStatsForUser, listCommentsForIncident, listIncidentsForUser, updateIncidentByAdmin } from '../services/incident.service.js';
 import { triageIncident } from '../services/triage.service.js';
 import { isTriageEnabled } from '../lib/gemini.js';
-import { type AddCommentInput, type CreateIncidentInput, type ListIncidentsQuery, type TriageInput, type UpdateIncidentInput } from '../schemas/incident.schema.js';
+import { type AddCommentInput, type BulkDeleteInput, type BulkUpdateInput, type CreateIncidentInput, type ListIncidentsQuery, type TriageInput, type UpdateIncidentInput } from '../schemas/incident.schema.js';
 
 export const listIncidentsHandler = asyncHandler(async (req, res) => {
 	const result = await listIncidentsForUser(req.query as unknown as ListIncidentsQuery, req.user!);
@@ -46,6 +46,16 @@ export const updateIncidentHandler = asyncHandler(async (req, res) => {
 export const deleteIncidentHandler = asyncHandler(async (req, res) => {
 	await deleteIncidentByAdmin(req.params.id);
 	res.status(204).end();
+});
+
+export const bulkUpdateHandler = asyncHandler(async (req, res) => {
+	const result = await bulkUpdateByAdmin(req.body as BulkUpdateInput, req.user!);
+	res.json(result);
+});
+
+export const bulkDeleteHandler = asyncHandler(async (req, res) => {
+	const result = await bulkDeleteByAdmin(req.body as BulkDeleteInput);
+	res.json(result);
 });
 
 export const listCommentsHandler = asyncHandler(async (req, res) => {

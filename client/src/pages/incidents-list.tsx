@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useMatch, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { createColumnHelper } from '@tanstack/react-table';
-import { LayoutGrid, Pencil, Plus, Search, Table2, Trash2 } from 'lucide-react';
-import { useDeleteIncident, useIncidents } from '@/hooks/use-incidents';
+import { createColumnHelper, type RowSelectionState } from '@tanstack/react-table';
+import { Download, LayoutGrid, Pencil, Plus, Search, Table2, Trash2, X } from 'lucide-react';
+import { useBulkDelete, useBulkUpdate, useDeleteIncident, useIncidents } from '@/hooks/use-incidents';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useUsers } from '@/hooks/use-users';
 import { useAuth } from '@/context/auth-context';
+import { exportIncidentsCsv } from '@/lib/export-csv';
 import { StatusBadge, PriorityBadge, OverdueBadge } from '@/components/badges';
 import { IncidentBoard } from '@/components/incident-board';
 import { ConfirmDialog } from '@/components/confirm-dialog';
@@ -15,6 +16,7 @@ import { DataGrid } from '@/components/ui/data-grid';
 import { Select } from '@/components/ui/select';
 import { Button, buttonClasses } from '@/components/ui/button';
 import { ActionMenu } from '@/components/ui/action-menu';
+import { SelectionBar } from '@/components/ui/selection-bar';
 import { IncidentDetailDrawer } from '@/components/incident-detail-drawer';
 import { IncidentCreateDrawer } from '@/components/incident-create-drawer';
 import { INCIDENT_TYPES, PRIORITIES, STATUSES, isOverdue, type Incident, type IncidentFilters, type IncidentType, type Priority, type Status } from '@/types/incident';
@@ -43,10 +45,15 @@ export function IncidentsListPage() {
 	const [assigneeId, setAssigneeId] = useState('');
 	const [overdue, setOverdue] = useState(false);
 	const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+	const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+	const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
 
 	const debouncedSearch = useDebounce(search, 300);
 	const { data: users } = useUsers(isAdmin);
 	const remove = useDeleteIncident();
+	const bulkUpdate = useBulkUpdate();
+	const bulkDelete = useBulkDelete();
+	const selectedIds = Object.keys(rowSelection);
 
 	const filters = useMemo<IncidentFilters>(
 		() => ({
@@ -131,7 +138,35 @@ export function IncidentsListPage() {
 		}
 	}
 
+	function clearSelection() {
+		setRowSelection({});
+	}
+
+	async function applyBulk(payload: { status?: Status; assigneeId?: string | null }) {
+		await bulkUpdate.mutateAsync({ ids: selectedIds, ...payload });
+		clearSelection();
+	}
+
+	async function handleBulkDelete() {
+		try {
+			await bulkDelete.mutateAsync(selectedIds);
+			clearSelection();
+		} finally {
+			setConfirmBulkDelete(false);
+		}
+	}
+
 	const assigneeOptions = [{ label: t('detail.unassigned'), value: 'unassigned' }, ...(users?.map((u) => ({ label: u.fullName, value: u.id })) ?? [])];
+
+	// Active-filter chips (removable). Each entry resets its own filter on click.
+	const chips: { key: string; label: string; clear: () => void }[] = [
+		debouncedSearch ? { key: 'q', label: `"${debouncedSearch}"`, clear: () => setSearch('') } : null,
+		status ? { key: 'status', label: status.replace('_', ' '), clear: () => setStatus('') } : null,
+		type ? { key: 'type', label: type, clear: () => setType('') } : null,
+		priority ? { key: 'priority', label: priority, clear: () => setPriority('') } : null,
+		assigneeId ? { key: 'assignee', label: assigneeOptions.find((o) => o.value === assigneeId)?.label ?? assigneeId, clear: () => setAssigneeId('') } : null,
+		overdue ? { key: 'overdue', label: t('incidents.overdue'), clear: () => setOverdue(false) } : null,
+	].filter((c): c is { key: string; label: string; clear: () => void } => c !== null);
 
 	return (
 		<div>
@@ -157,6 +192,10 @@ export function IncidentsListPage() {
 								);
 							})}
 						</div>
+						<Button variant="secondary" size="md" onClick={() => exportIncidentsCsv(incidents)} disabled={incidents.length === 0}>
+							<Download className="h-4 w-4" />
+							{t('incidents.export')}
+						</Button>
 						<Link to="/incidents/new" className={buttonClasses('primary')}>
 							<Plus className="h-4 w-4" />
 							{t('incidents.new')}
@@ -196,6 +235,22 @@ export function IncidentsListPage() {
 				)}
 			</div>
 
+			{chips.length > 0 && (
+				<div className="mb-4 flex flex-wrap items-center gap-2">
+					{chips.map((chip) => (
+						<button
+							key={chip.key}
+							type="button"
+							onClick={chip.clear}
+							className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+						>
+							{chip.label}
+							<X className="h-3 w-3" aria-hidden="true" />
+						</button>
+					))}
+				</div>
+			)}
+
 			{isLoading && <SkeletonRows />}
 
 			{isError && (
@@ -221,7 +276,17 @@ export function IncidentsListPage() {
 			{incidents.length > 0 && (
 				<>
 					<p className="mb-2 text-xs text-slate-500 dark:text-slate-400">{t('incidents.showing', { shown: incidents.length, total })}</p>
-					{view === 'board' ? <IncidentBoard incidents={incidents} canDrag={isAdmin} /> : <DataGrid columns={columns} data={incidents} />}
+					{isAdmin && view === 'table' && (
+						<SelectionBar count={selectedIds.length} onClear={clearSelection}>
+							<Select aria-label={t('incidents.bulkStatus')} value="" placeholder={t('incidents.bulkStatus')} options={toOptions(STATUSES)} disabled={bulkUpdate.isPending} onChange={(v) => v && applyBulk({ status: v as Status })} className="min-w-36" />
+							<Select aria-label={t('incidents.bulkAssign')} value="" placeholder={t('incidents.bulkAssign')} options={assigneeOptions} disabled={bulkUpdate.isPending} onChange={(v) => v && applyBulk({ assigneeId: v === 'unassigned' ? null : v })} className="min-w-36" />
+							<Button variant="danger" size="sm" onClick={() => setConfirmBulkDelete(true)} loading={bulkDelete.isPending}>
+								<Trash2 className="h-4 w-4" />
+								{t('common.delete')}
+							</Button>
+						</SelectionBar>
+					)}
+					{view === 'board' ? <IncidentBoard incidents={incidents} canDrag={isAdmin} /> : <DataGrid columns={columns} data={incidents} {...(isAdmin ? { getRowId: (r: Incident) => r.id, rowSelection, onRowSelectionChange: setRowSelection } : {})} />}
 				</>
 			)}
 
@@ -241,6 +306,17 @@ export function IncidentsListPage() {
 				onConfirm={handleDelete}
 				onCancel={() => setConfirmDeleteId(null)}
 				loading={remove.isPending}
+				destructive
+			/>
+
+			<ConfirmDialog
+				open={confirmBulkDelete}
+				title={t('confirm.deleteTitle')}
+				message={t('confirm.bulkDeleteMessage', { count: selectedIds.length })}
+				confirmLabel={t('confirm.deleteConfirm')}
+				onConfirm={handleBulkDelete}
+				onCancel={() => setConfirmBulkDelete(false)}
+				loading={bulkDelete.isPending}
 				destructive
 			/>
 

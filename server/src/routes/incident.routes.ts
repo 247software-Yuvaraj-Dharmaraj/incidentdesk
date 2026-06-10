@@ -4,8 +4,8 @@ import { Role } from '@prisma/client';
 import { requireAuth } from '../middleware/auth.middleware.js';
 import { requireRole } from '../middleware/require-role.js';
 import { validate } from '../middleware/validate.js';
-import { addCommentSchema, createIncidentSchema, listIncidentsQuerySchema, triageSchema, updateIncidentSchema } from '../schemas/incident.schema.js';
-import { addCommentHandler, createIncidentHandler, deleteIncidentHandler, getIncidentHandler, listCommentsHandler, listIncidentsHandler, metricsHandler, statsHandler, triageEnabledHandler, triageHandler, updateIncidentHandler } from '../controllers/incident.controller.js';
+import { addCommentSchema, bulkDeleteSchema, bulkUpdateSchema, createIncidentSchema, listIncidentsQuerySchema, triageSchema, updateIncidentSchema } from '../schemas/incident.schema.js';
+import { addCommentHandler, bulkDeleteHandler, bulkUpdateHandler, createIncidentHandler, deleteIncidentHandler, getIncidentHandler, listCommentsHandler, listIncidentsHandler, metricsHandler, statsHandler, triageEnabledHandler, triageHandler, updateIncidentHandler } from '../controllers/incident.controller.js';
 
 // Throttle AI triage to protect the (quota-limited) Gemini key from abuse.
 const triageLimiter = rateLimit({
@@ -35,6 +35,8 @@ router.get('/metrics', metricsHandler);
 router.get('/triage/status', triageEnabledHandler);
 router.post('/triage', triageLimiter, validate(triageSchema), triageHandler);
 router.post('/', writeLimiter, validate(createIncidentSchema), createIncidentHandler);
+router.post('/bulk-update', requireRole(Role.ADMIN), writeLimiter, validate(bulkUpdateSchema), bulkUpdateHandler);
+router.post('/bulk-delete', requireRole(Role.ADMIN), writeLimiter, validate(bulkDeleteSchema), bulkDeleteHandler);
 router.get('/:id', getIncidentHandler);
 router.patch('/:id', requireRole(Role.ADMIN), validate(updateIncidentSchema), updateIncidentHandler);
 router.delete('/:id', requireRole(Role.ADMIN), deleteIncidentHandler);

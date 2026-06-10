@@ -11,7 +11,9 @@
 		"comfortableView": "Cambiar a vista cómoda",
 		"cancel": "Cancelar",
 		"edit": "Editar",
-		"delete": "Eliminar"
+		"delete": "Eliminar",
+		"selected": "seleccionados",
+		"clear": "Limpiar"
 	},
 	"nav": {
 		"primary": "Principal",
@@ -79,7 +81,10 @@
 		},
 		"overdue": "Vencido",
 		"overdueOnly": "Solo vencidos",
-		"showing": "Mostrando {{shown}} de {{total}}"
+		"showing": "Mostrando {{shown}} de {{total}}",
+		"export": "Exportar",
+		"bulkStatus": "Cambiar estado…",
+		"bulkAssign": "Asignar…"
 	},
 	"form": {
 		"title": "Título",
@@ -122,7 +127,8 @@
 	"confirm": {
 		"deleteTitle": "¿Eliminar este incidente?",
 		"deleteMessage": "Esto elimina permanentemente el incidente y su historial de actividad. No se puede deshacer.",
-		"deleteConfirm": "Eliminar"
+		"deleteConfirm": "Eliminar",
+		"bulkDeleteMessage": "¿Eliminar {{count}} incidencia(s) seleccionada(s)? Esto no se puede deshacer."
 	},
 	"toast": {
 		"incidentCreated": "Incidente creado",
@@ -133,7 +139,9 @@
 		"aiApplied": "Sugerencias de IA aplicadas",
 		"aiFailed": "Error en la sugerencia de IA",
 		"updateConflict": "Esta incidencia fue modificada en otro lugar: actualizando.",
-		"commentFailed": "No se pudo publicar el comentario"
+		"commentFailed": "No se pudo publicar el comentario",
+		"bulkUpdated": "{{count}} incidencia(s) actualizada(s)",
+		"bulkDeleted": "{{count}} incidencia(s) eliminada(s)"
 	},
 	"comments": {
 		"title": "Comentarios",

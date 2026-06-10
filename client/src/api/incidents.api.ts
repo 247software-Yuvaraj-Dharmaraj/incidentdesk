@@ -71,6 +71,23 @@ export async function updateIncident(id: string, payload: UpdateIncidentPayload)
 	return data.incident;
 }
 
+export interface BulkUpdatePayload {
+	ids: string[];
+	status?: Incident['status'];
+	priority?: Incident['priority'];
+	assigneeId?: string | null;
+}
+
+export async function bulkUpdate(payload: BulkUpdatePayload): Promise<{ updated: number; skipped: number }> {
+	const { data } = await http.post<{ updated: number; skipped: number }>('/incidents/bulk-update', payload);
+	return data;
+}
+
+export async function bulkDelete(ids: string[]): Promise<{ deleted: number }> {
+	const { data } = await http.post<{ deleted: number }>('/incidents/bulk-delete', { ids });
+	return data;
+}
+
 export async function listComments(id: string): Promise<Comment[]> {
 	const { data } = await http.get<{ comments: Comment[] }>(`/incidents/${id}/comments`);
 	return data.comments;

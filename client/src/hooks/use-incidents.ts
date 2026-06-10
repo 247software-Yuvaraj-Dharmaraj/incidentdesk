@@ -132,6 +132,30 @@ export function useUpdateIncident() {
 	});
 }
 
+export function useBulkUpdate() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: incidentsApi.bulkUpdate,
+		onSuccess: (res) => {
+			queryClient.invalidateQueries({ queryKey: incidentKeys.all });
+			toast.success(i18n.t('toast.bulkUpdated', { count: res.updated }));
+		},
+		onError: () => toast.error(i18n.t('toast.updateFailed')),
+	});
+}
+
+export function useBulkDelete() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: incidentsApi.bulkDelete,
+		onSuccess: (res) => {
+			queryClient.invalidateQueries({ queryKey: incidentKeys.all });
+			toast.success(i18n.t('toast.bulkDeleted', { count: res.deleted }));
+		},
+		onError: () => toast.error(i18n.t('toast.deleteFailed')),
+	});
+}
+
 export function useComments(id: string) {
 	return useQuery({
 		queryKey: incidentKeys.comments(id),

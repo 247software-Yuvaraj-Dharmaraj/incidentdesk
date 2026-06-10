@@ -26,6 +26,19 @@ export const addCommentSchema = z.object({
 	body: z.string().trim().min(1, 'Comment cannot be empty').max(2000),
 });
 
+export const bulkUpdateSchema = z
+	.object({
+		ids: z.array(z.string().cuid()).min(1).max(100),
+		status: z.nativeEnum(Status).optional(),
+		priority: z.nativeEnum(Priority).optional(),
+		assigneeId: z.string().cuid().nullable().optional(),
+	})
+	.refine((d) => d.status !== undefined || d.priority !== undefined || d.assigneeId !== undefined, { message: 'At least one field is required' });
+
+export const bulkDeleteSchema = z.object({
+	ids: z.array(z.string().cuid()).min(1).max(100),
+});
+
 export const listIncidentsQuerySchema = z.object({
 	status: z.nativeEnum(Status).optional(),
 	type: z.nativeEnum(IncidentType).optional(),
@@ -50,4 +63,6 @@ export type CreateIncidentInput = z.infer<typeof createIncidentSchema>;
 export type TriageInput = z.infer<typeof triageSchema>;
 export type UpdateIncidentInput = z.infer<typeof updateIncidentSchema>;
 export type AddCommentInput = z.infer<typeof addCommentSchema>;
+export type BulkUpdateInput = z.infer<typeof bulkUpdateSchema>;
+export type BulkDeleteInput = z.infer<typeof bulkDeleteSchema>;
 export type ListIncidentsQuery = z.infer<typeof listIncidentsQuerySchema>;
