@@ -6,6 +6,23 @@ export const http = axios.create({
 	headers: { 'Content-Type': 'application/json' },
 });
 
+// On session expiry (401), send the user back to login — but not on the auth probe
+// (/auth/me) or the login call, where a 401 is an expected response, and not if
+// we're already on the login page.
+http.interceptors.response.use(
+	(response) => response,
+	(error) => {
+		if (axios.isAxiosError(error)) {
+			const url = error.config?.url ?? '';
+			const isAuthProbe = url.includes('/auth/me') || url.includes('/auth/login');
+			if (error.response?.status === 401 && !isAuthProbe && window.location.pathname !== '/login') {
+				window.location.assign('/login');
+			}
+		}
+		return Promise.reject(error);
+	}
+);
+
 /** Normalizes an axios error into a user-facing message. */
 export function getErrorMessage(error: unknown, fallback = 'Something went wrong'): string {
 	if (axios.isAxiosError(error)) {

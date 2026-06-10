@@ -40,6 +40,7 @@ export function IncidentNewPage() {
 	});
 
 	const title = watch('title');
+	const description = watch('description') ?? '';
 
 	async function onSubmit(values: CreateIncidentValues) {
 		setFormError(null);
@@ -76,7 +77,7 @@ export function IncidentNewPage() {
 				</Button>
 			}
 		>
-			<TextField label={t('form.title')} placeholder={t('form.titlePlaceholder')} {...register('title')} error={errors.title?.message} />
+			<TextField label={t('form.title')} placeholder={t('form.titlePlaceholder')} maxLength={140} {...register('title')} error={errors.title?.message} />
 
 			{aiEnabled && (
 				<div className="flex flex-col gap-2">
@@ -99,12 +100,16 @@ export function IncidentNewPage() {
 			</div>
 
 			<div className="flex flex-col gap-1">
-				<label htmlFor="description" className="text-sm font-medium text-slate-700 dark:text-slate-300">
-					{t('form.description')}
-				</label>
+				<div className="flex items-center justify-between">
+					<label htmlFor="description" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+						{t('form.description')}
+					</label>
+					<span className="text-xs text-slate-400 dark:text-slate-500">{description.length}/2000</span>
+				</div>
 				<textarea
 					id="description"
 					rows={4}
+					maxLength={2000}
 					placeholder={t('form.descriptionPlaceholder')}
 					className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-slate-700"
 					{...register('description')}

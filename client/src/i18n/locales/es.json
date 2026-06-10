@@ -71,7 +71,9 @@
 			"status": "Estado",
 			"reported": "Reportado",
 			"actions": "Acciones"
-		}
+		},
+		"overdue": "Vencido",
+		"overdueOnly": "Solo vencidos"
 	},
 	"form": {
 		"title": "Título",
@@ -101,7 +103,9 @@
 		"activity": "Actividad",
 		"noActivity": "Aún no hay actividad.",
 		"changeEntry": "{{actor}} cambió {{field}} de {{from}} a {{to}}",
-		"delete": "Eliminar incidente"
+		"delete": "Eliminar incidente",
+		"dueDate": "Fecha límite",
+		"resolvedAt": "Resuelto el"
 	},
 	"confirm": {
 		"deleteTitle": "¿Eliminar este incidente?",
@@ -115,6 +119,14 @@
 		"incidentDeleted": "Incidente eliminado",
 		"deleteFailed": "Error al eliminar el incidente",
 		"aiApplied": "Sugerencias de IA aplicadas",
-		"aiFailed": "Error en la sugerencia de IA"
+		"aiFailed": "Error en la sugerencia de IA",
+		"updateConflict": "Esta incidencia fue modificada en otro lugar: actualizando.",
+		"commentFailed": "No se pudo publicar el comentario"
+	},
+	"comments": {
+		"title": "Comentarios",
+		"empty": "Aún no hay comentarios.",
+		"placeholder": "Añade un comentario…",
+		"post": "Publicar comentario"
 	}
 }

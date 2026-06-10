@@ -1,6 +1,6 @@
 import { http } from './http';
 import { type CreateIncidentValues } from '@/schemas/incident.schema';
-import { type Incident, type IncidentFilters, type IncidentPage } from '@/types/incident';
+import { type Comment, type Incident, type IncidentFilters, type IncidentPage } from '@/types/incident';
 
 interface ListParams extends IncidentFilters {
 	cursor?: string;
@@ -56,9 +56,22 @@ export interface UpdateIncidentPayload {
 	status?: Incident['status'];
 	priority?: Incident['priority'];
 	assigneeId?: string | null;
+	dueDate?: string | null;
+	/** updatedAt the client last saw — server rejects (409) if the incident changed since. */
+	expectedUpdatedAt?: string;
 }
 
 export async function updateIncident(id: string, payload: UpdateIncidentPayload): Promise<Incident> {
 	const { data } = await http.patch<{ incident: Incident }>(`/incidents/${id}`, payload);
 	return data.incident;
+}
+
+export async function listComments(id: string): Promise<Comment[]> {
+	const { data } = await http.get<{ comments: Comment[] }>(`/incidents/${id}/comments`);
+	return data.comments;
+}
+
+export async function addComment(id: string, body: string): Promise<Comment> {
+	const { data } = await http.post<{ comment: Comment }>(`/incidents/${id}/comments`, { body });
+	return data.comment;
 }

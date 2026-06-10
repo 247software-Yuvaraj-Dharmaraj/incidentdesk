@@ -7,7 +7,7 @@ import { useDeleteIncident, useIncidents } from '@/hooks/use-incidents';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useUsers } from '@/hooks/use-users';
 import { useAuth } from '@/context/auth-context';
-import { StatusBadge, PriorityBadge } from '@/components/badges';
+import { StatusBadge, PriorityBadge, OverdueBadge } from '@/components/badges';
 import { IncidentBoard } from '@/components/incident-board';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { PageHeader } from '@/components/ui/page-header';
@@ -15,7 +15,7 @@ import { DataGrid } from '@/components/ui/data-grid';
 import { Select } from '@/components/ui/select';
 import { Button, buttonClasses } from '@/components/ui/button';
 import { ActionMenu } from '@/components/ui/action-menu';
-import { INCIDENT_TYPES, PRIORITIES, STATUSES, type Incident, type IncidentFilters, type IncidentType, type Priority, type Status } from '@/types/incident';
+import { INCIDENT_TYPES, PRIORITIES, STATUSES, isOverdue, type Incident, type IncidentFilters, type IncidentType, type Priority, type Status } from '@/types/incident';
 
 const PRIORITY_RANK: Record<Priority, number> = { LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 3 };
 const STATUS_RANK: Record<Status, number> = { OPEN: 0, IN_PROGRESS: 1, RESOLVED: 2, CLOSED: 3 };
@@ -37,6 +37,7 @@ export function IncidentsListPage() {
 	const [type, setType] = useState<IncidentType | ''>('');
 	const [priority, setPriority] = useState<Priority | ''>('');
 	const [assigneeId, setAssigneeId] = useState('');
+	const [overdue, setOverdue] = useState(false);
 	const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
 	const debouncedSearch = useDebounce(search, 300);
@@ -50,13 +51,14 @@ export function IncidentsListPage() {
 			...(type ? { type } : {}),
 			...(priority ? { priority } : {}),
 			...(assigneeId ? { assigneeId } : {}),
+			...(overdue ? { overdue: true } : {}),
 		}),
-		[debouncedSearch, status, type, priority, assigneeId]
+		[debouncedSearch, status, type, priority, assigneeId, overdue]
 	);
 
 	const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useIncidents(filters);
 	const incidents = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
-	const hasFilters = Boolean(debouncedSearch || status || type || priority || assigneeId);
+	const hasFilters = Boolean(debouncedSearch || status || type || priority || assigneeId || overdue);
 
 	useEffect(() => {
 		localStorage.setItem('incidents-view', view);
@@ -71,9 +73,12 @@ export function IncidentsListPage() {
 			columnHelper.accessor('title', {
 				header: t('incidents.col.title'),
 				cell: (info) => (
-					<Link to={`/incidents/${info.row.original.id}`} title={info.getValue()} className="block max-w-xs truncate font-medium text-slate-900 hover:underline dark:text-slate-100">
-						{info.getValue()}
-					</Link>
+					<div className="flex items-center gap-2">
+						<Link to={`/incidents/${info.row.original.id}`} title={info.getValue()} className="block max-w-xs truncate font-medium text-slate-900 hover:underline dark:text-slate-100">
+							{info.getValue()}
+						</Link>
+						{isOverdue(info.row.original) && <OverdueBadge label={t('incidents.overdue')} />}
+					</div>
 				),
 			}),
 			columnHelper.accessor('type', { header: t('incidents.col.type'), cell: (info) => <span className="text-slate-500 dark:text-slate-400">{info.getValue()}</span> }),
@@ -109,6 +114,7 @@ export function IncidentsListPage() {
 		setType('');
 		setPriority('');
 		setAssigneeId('');
+		setOverdue(false);
 	}
 
 	async function handleDelete() {
@@ -170,6 +176,14 @@ export function IncidentsListPage() {
 				<Select value={type} onChange={(v) => setType(v as IncidentType | '')} placeholder={t('incidents.allTypes')} options={toOptions(INCIDENT_TYPES)} className="min-w-40" />
 				<Select value={priority} onChange={(v) => setPriority(v as Priority | '')} placeholder={t('incidents.allPriorities')} options={toOptions(PRIORITIES)} className="min-w-40" />
 				{isAdmin && <Select value={assigneeId} onChange={(v) => setAssigneeId(v)} placeholder={t('incidents.allAssignees')} options={assigneeOptions} className="min-w-44" />}
+				<button
+					type="button"
+					onClick={() => setOverdue((v) => !v)}
+					aria-pressed={overdue}
+					className={`rounded-lg border px-3 py-2 text-sm font-medium transition ${overdue ? 'border-red-300 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300' : 'border-slate-300 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+				>
+					{t('incidents.overdueOnly')}
+				</button>
 				{hasFilters && (
 					<Button variant="ghost" size="sm" onClick={clearFilters}>
 						{t('incidents.clear')}

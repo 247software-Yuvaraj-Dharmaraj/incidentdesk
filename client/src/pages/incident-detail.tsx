@@ -2,22 +2,27 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Trash2 } from 'lucide-react';
-import { useDeleteIncident, useIncident, useUpdateIncident } from '@/hooks/use-incidents';
+import { useAddComment, useComments, useDeleteIncident, useIncident, useUpdateIncident } from '@/hooks/use-incidents';
 import { useUsers } from '@/hooks/use-users';
 import { useAuth } from '@/context/auth-context';
-import { StatusBadge, PriorityBadge } from '@/components/badges';
+import { selectableStatuses } from '@/lib/incident-status';
+import { StatusBadge, PriorityBadge, OverdueBadge } from '@/components/badges';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { Card } from '@/components/ui/card';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { PRIORITIES, STATUSES, type Priority, type Status } from '@/types/incident';
+import { PRIORITIES, isOverdue, type Priority, type Status } from '@/types/incident';
 
 const toOptions = (values: string[]) => values.map((v) => ({ label: v.replace('_', ' '), value: v }));
+
+// A native date input wants YYYY-MM-DD; convert to/from the stored ISO timestamp.
+const toDateInput = (iso: string | null) => (iso ? new Date(iso).toISOString().slice(0, 10) : '');
+const fromDateInput = (value: string) => (value ? new Date(`${value}T00:00:00`).toISOString() : null);
 
 export function IncidentDetailPage() {
 	const { id = '' } = useParams();
 	const { user } = useAuth();
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
 	const navigate = useNavigate();
 	const isAdmin = user?.role === 'ADMIN';
 	const [confirmOpen, setConfirmOpen] = useState(false);
@@ -51,7 +56,12 @@ export function IncidentDetailPage() {
 		);
 	}
 
+	// Every admin write carries the version we last saw, so a stale edit is rejected (409).
+	const patch = (payload: Parameters<typeof update.mutate>[0]['payload']) => update.mutate({ id, payload: { ...payload, expectedUpdatedAt: incident.updatedAt } });
+
 	const assigneeOptions = [{ label: t('detail.unassigned'), value: '' }, ...(users?.map((u) => ({ label: u.fullName, value: u.id })) ?? [])];
+	const statusOptions = toOptions(selectableStatuses(incident.status));
+	const overdue = isOverdue(incident);
 
 	return (
 		<div className="mx-auto max-w-3xl">
@@ -62,7 +72,8 @@ export function IncidentDetailPage() {
 
 			<div className="mt-3 flex items-start justify-between gap-4">
 				<h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{incident.title}</h1>
-				<div className="flex shrink-0 gap-2">
+				<div className="flex shrink-0 flex-wrap justify-end gap-2">
+					{overdue && <OverdueBadge label={t('incidents.overdue')} />}
 					<StatusBadge status={incident.status} />
 					<PriorityBadge priority={incident.priority} />
 				</div>
@@ -73,10 +84,12 @@ export function IncidentDetailPage() {
 					<Field label={t('detail.type')} value={incident.type} />
 					<Field label={t('detail.reportedBy')} value={incident.reporter.fullName} />
 					<Field label={t('detail.assignee')} value={incident.assignee?.fullName ?? t('detail.unassigned')} />
-					<Field label={t('detail.created')} value={new Date(incident.createdAt).toLocaleString()} />
+					<Field label={t('detail.created')} value={new Date(incident.createdAt).toLocaleString(i18n.resolvedLanguage)} />
+					<Field label={t('detail.dueDate')} value={incident.dueDate ? new Date(incident.dueDate).toLocaleDateString(i18n.resolvedLanguage) : '—'} />
+					<Field label={t('detail.resolvedAt')} value={incident.resolvedAt ? new Date(incident.resolvedAt).toLocaleString(i18n.resolvedLanguage) : '—'} />
 					<div className="col-span-2">
-						<dt className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">{t('detail.description')}</dt>
-						<dd className="mt-1 text-slate-700 dark:text-slate-300">{incident.description || '—'}</dd>
+						<dt className="text-xs tracking-wide text-slate-400 uppercase dark:text-slate-500">{t('detail.description')}</dt>
+						<dd className="mt-1 whitespace-pre-wrap text-slate-700 dark:text-slate-300">{incident.description || '—'}</dd>
 					</div>
 				</dl>
 			</Card>
@@ -84,10 +97,23 @@ export function IncidentDetailPage() {
 			{isAdmin && (
 				<Card className="mt-6 p-6">
 					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-slate-100">{t('detail.adminControls')}</h2>
-					<div className="grid grid-cols-3 gap-4">
-						<Select label={t('detail.status')} value={incident.status} disabled={update.isPending} options={toOptions(STATUSES)} onChange={(v) => update.mutate({ id, payload: { status: v as Status } })} />
-						<Select label={t('detail.priority')} value={incident.priority} disabled={update.isPending} options={toOptions(PRIORITIES)} onChange={(v) => update.mutate({ id, payload: { priority: v as Priority } })} />
-						<Select label={t('detail.assignee')} value={incident.assigneeId ?? ''} disabled={update.isPending} options={assigneeOptions} onChange={(v) => update.mutate({ id, payload: { assigneeId: v || null } })} />
+					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+						<Select label={t('detail.status')} value={incident.status} disabled={update.isPending} options={statusOptions} onChange={(v) => patch({ status: v as Status })} />
+						<Select label={t('detail.priority')} value={incident.priority} disabled={update.isPending} options={toOptions(PRIORITIES)} onChange={(v) => patch({ priority: v as Priority })} />
+						<Select label={t('detail.assignee')} value={incident.assigneeId ?? ''} disabled={update.isPending} options={assigneeOptions} onChange={(v) => patch({ assigneeId: v || null })} />
+						<div className="flex flex-col gap-1">
+							<label htmlFor="dueDate" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+								{t('detail.dueDate')}
+							</label>
+							<input
+								id="dueDate"
+								type="date"
+								value={toDateInput(incident.dueDate)}
+								disabled={update.isPending}
+								onChange={(e) => patch({ dueDate: fromDateInput(e.target.value) })}
+								className="cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-slate-700"
+							/>
+						</div>
 					</div>
 					{update.isError && (
 						<p role="alert" className="mt-3 text-sm text-red-500 dark:text-red-400">
@@ -104,6 +130,8 @@ export function IncidentDetailPage() {
 				</Card>
 			)}
 
+			<CommentsSection incidentId={id} />
+
 			<div className="mt-6">
 				<h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{t('detail.activity')}</h2>
 				{incident.auditLogs && incident.auditLogs.length > 0 ? (
@@ -111,7 +139,7 @@ export function IncidentDetailPage() {
 						{incident.auditLogs.map((log) => (
 							<li key={log.id} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
 								{t('detail.changeEntry', { actor: log.actor.fullName, field: log.field, from: log.oldValue ?? '—', to: log.newValue ?? '—' })}
-								<span className="ml-2 text-xs text-slate-400 dark:text-slate-500">{new Date(log.createdAt).toLocaleString()}</span>
+								<span className="ml-2 text-xs text-slate-400 dark:text-slate-500">{new Date(log.createdAt).toLocaleString(i18n.resolvedLanguage)}</span>
 							</li>
 						))}
 					</ul>
@@ -134,10 +162,68 @@ export function IncidentDetailPage() {
 	);
 }
 
+function CommentsSection({ incidentId }: { incidentId: string }) {
+	const { t, i18n } = useTranslation();
+	const { data: comments, isLoading } = useComments(incidentId);
+	const addComment = useAddComment(incidentId);
+	const [body, setBody] = useState('');
+
+	async function submit(e: React.FormEvent) {
+		e.preventDefault();
+		const trimmed = body.trim();
+		if (!trimmed) return;
+		try {
+			await addComment.mutateAsync(trimmed);
+			setBody('');
+		} catch {
+			/* error toast handled in the hook */
+		}
+	}
+
+	return (
+		<div className="mt-6">
+			<h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{t('comments.title')}</h2>
+
+			{isLoading ? (
+				<div className="h-16 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" role="status" aria-live="polite" />
+			) : comments && comments.length > 0 ? (
+				<ul className="space-y-3">
+					{comments.map((c) => (
+						<li key={c.id} className="rounded-lg border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
+							<div className="flex items-center justify-between gap-2">
+								<span className="text-sm font-medium text-slate-800 dark:text-slate-100">{c.author.fullName}</span>
+								<span className="text-xs text-slate-400 dark:text-slate-500">{new Date(c.createdAt).toLocaleString(i18n.resolvedLanguage)}</span>
+							</div>
+							<p className="mt-1 text-sm whitespace-pre-wrap text-slate-600 dark:text-slate-300">{c.body}</p>
+						</li>
+					))}
+				</ul>
+			) : (
+				<p className="text-sm text-slate-400 dark:text-slate-500">{t('comments.empty')}</p>
+			)}
+
+			<form onSubmit={submit} className="mt-3 flex flex-col gap-2">
+				<textarea
+					rows={3}
+					value={body}
+					onChange={(e) => setBody(e.target.value)}
+					maxLength={2000}
+					placeholder={t('comments.placeholder')}
+					aria-label={t('comments.placeholder')}
+					className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-slate-700"
+				/>
+				<Button type="submit" size="sm" className="self-start" loading={addComment.isPending} disabled={!body.trim()}>
+					{t('comments.post')}
+				</Button>
+			</form>
+		</div>
+	);
+}
+
 function Field({ label, value }: { label: string; value: string }) {
 	return (
 		<div>
-			<dt className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">{label}</dt>
+			<dt className="text-xs tracking-wide text-slate-400 uppercase dark:text-slate-500">{label}</dt>
 			<dd className="mt-1 text-slate-700 dark:text-slate-300">{value}</dd>
 		</div>
 	);

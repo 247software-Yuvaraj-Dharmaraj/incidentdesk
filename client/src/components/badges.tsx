@@ -1,3 +1,4 @@
+import { AlarmClock } from 'lucide-react';
 import { type Priority, type Status } from '@/types/incident';
 
 const statusStyles: Record<Status, string> = {
@@ -29,4 +30,13 @@ export function StatusBadge({ status }: { status: Status }) {
 
 export function PriorityBadge({ priority }: { priority: Priority }) {
 	return <Pill label={priority} className={priorityStyles[priority]} />;
+}
+
+export function OverdueBadge({ label }: { label: string }) {
+	return (
+		<span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-600/20 ring-inset dark:bg-red-950 dark:text-red-300 dark:ring-red-400/30">
+			<AlarmClock className="h-3 w-3" aria-hidden="true" />
+			{label}
+		</span>
+	);
 }

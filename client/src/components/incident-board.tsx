@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { DndContext, KeyboardSensor, PointerSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { useUpdateIncident } from '@/hooks/use-incidents';
-import { PriorityBadge } from '@/components/badges';
-import { STATUSES, type Incident, type Status } from '@/types/incident';
+import { PriorityBadge, OverdueBadge } from '@/components/badges';
+import { STATUSES, isOverdue, type Incident, type Status } from '@/types/incident';
 
 const COLUMN_ACCENT: Record<Status, string> = {
 	OPEN: 'border-t-blue-400 dark:border-t-blue-500',
@@ -77,6 +78,7 @@ function Column({ status, incidents, canDrag }: { status: Status; incidents: Inc
 }
 
 function Card({ incident, canDrag }: { incident: Incident; canDrag: boolean }) {
+	const { t } = useTranslation();
 	const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: incident.id, disabled: !canDrag });
 	const style = transform ? { transform: `translate(${transform.x}px, ${transform.y}px)`, zIndex: 10 } : undefined;
 	return (
@@ -90,6 +92,11 @@ function Card({ incident, canDrag }: { incident: Incident; canDrag: boolean }) {
 			<Link to={`/incidents/${incident.id}`} className="block text-sm font-medium text-slate-900 hover:underline dark:text-slate-100" onPointerDown={(e) => e.stopPropagation()}>
 				{incident.title}
 			</Link>
+			{isOverdue(incident) && (
+				<div className="mt-2">
+					<OverdueBadge label={t('incidents.overdue')} />
+				</div>
+			)}
 			<div className="mt-2 flex items-center justify-between">
 				<PriorityBadge priority={incident.priority} />
 				<span className="text-xs text-slate-400 dark:text-slate-500">{incident.type}</span>

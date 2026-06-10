@@ -17,6 +17,13 @@ export interface AuditLog {
 	createdAt: string;
 }
 
+export interface Comment {
+	id: string;
+	body: string;
+	author: UserPreview;
+	createdAt: string;
+}
+
 export interface Incident {
 	id: string;
 	title: string;
@@ -24,6 +31,8 @@ export interface Incident {
 	priority: Priority;
 	status: Status;
 	description: string | null;
+	dueDate: string | null;
+	resolvedAt: string | null;
 	reporter: UserPreview;
 	assignee: UserPreview | null;
 	reporterId: string;
@@ -39,6 +48,12 @@ export interface IncidentFilters {
 	priority?: Priority;
 	q?: string;
 	assigneeId?: string;
+	overdue?: boolean;
+}
+
+/** True when an incident is past its due date and not yet resolved or closed. */
+export function isOverdue(incident: Pick<Incident, 'dueDate' | 'status'>): boolean {
+	return !!incident.dueDate && incident.status !== 'RESOLVED' && incident.status !== 'CLOSED' && new Date(incident.dueDate).getTime() < Date.now();
 }
 
 export interface IncidentPage {

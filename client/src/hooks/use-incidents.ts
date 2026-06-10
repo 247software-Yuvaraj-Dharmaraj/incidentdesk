@@ -1,8 +1,9 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import { toast } from 'sonner';
 import i18n from '@/i18n';
 import * as incidentsApi from '@/api/incidents.api';
-import { type Incident, type IncidentFilters, type IncidentPage } from '@/types/incident';
+import { type Comment, type Incident, type IncidentFilters, type IncidentPage } from '@/types/incident';
 
 const PAGE_SIZE = 10;
 
@@ -10,6 +11,7 @@ export const incidentKeys = {
 	all: ['incidents'] as const,
 	list: (filters: IncidentFilters) => ['incidents', 'list', filters] as const,
 	detail: (id: string) => ['incidents', 'detail', id] as const,
+	comments: (id: string) => ['incidents', 'detail', id, 'comments'] as const,
 };
 
 export function useIncidents(filters: IncidentFilters) {
@@ -78,6 +80,7 @@ export function useUpdateIncident() {
 				...(payload.status ? { status: payload.status } : {}),
 				...(payload.priority ? { priority: payload.priority } : {}),
 				...(payload.assigneeId !== undefined ? { assigneeId: payload.assigneeId } : {}),
+				...(payload.dueDate !== undefined ? { dueDate: payload.dueDate } : {}),
 			};
 
 			const prevDetail = queryClient.getQueryData<Incident>(incidentKeys.detail(id));
@@ -102,17 +105,42 @@ export function useUpdateIncident() {
 			const toastId = toast.success(i18n.t('toast.incidentUpdated'));
 			return { prevDetail, prevLists, toastId };
 		},
-		onError: (_err, { id }, context) => {
+		onError: (err, { id }, context) => {
 			if (context?.prevDetail) {
 				queryClient.setQueryData(incidentKeys.detail(id), context.prevDetail);
 			}
 			context?.prevLists?.forEach(([key, data]) => queryClient.setQueryData(key, data));
 			// Replace the optimistic success toast with the failure.
 			if (context?.toastId) toast.dismiss(context.toastId);
-			toast.error(i18n.t('toast.updateFailed'));
+			// 409 = a stale write (concurrency conflict) or a disallowed status transition.
+			if (isAxiosError(err) && err.response?.status === 409) {
+				toast.error(err.response.data?.error ?? i18n.t('toast.updateConflict'));
+			} else {
+				toast.error(i18n.t('toast.updateFailed'));
+			}
 		},
 		onSettled: () => {
 			queryClient.invalidateQueries({ queryKey: incidentKeys.all });
+		},
+	});
+}
+
+export function useComments(id: string) {
+	return useQuery({
+		queryKey: incidentKeys.comments(id),
+		queryFn: () => incidentsApi.listComments(id),
+	});
+}
+
+export function useAddComment(id: string) {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (body: string) => incidentsApi.addComment(id, body),
+		onSuccess: (comment) => {
+			queryClient.setQueryData<Comment[]>(incidentKeys.comments(id), (prev) => [...(prev ?? []), comment]);
+		},
+		onError: () => {
+			toast.error(i18n.t('toast.commentFailed'));
 		},
 	});
 }

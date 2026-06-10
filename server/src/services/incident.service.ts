@@ -1,8 +1,10 @@
 import { type Prisma, Role, Status } from '@prisma/client';
 import { ApiError } from '../lib/api-error.js';
+import { canTransition } from '../lib/incident-status.js';
 import { type AuthUser } from '../types/auth.js';
 import { type CreateIncidentInput, type ListIncidentsQuery, type UpdateIncidentInput } from '../schemas/incident.schema.js';
 import { type AuditEntry, countIncidentsByStatus, createIncident, deleteIncidentById, findIncidentById, listIncidents, updateIncident } from '../repos/incident.repo.js';
+import { createComment, listComments } from '../repos/comment.repo.js';
 import { findUserExists } from '../repos/user.repo.js';
 import { emitIncidentsChanged } from '../lib/realtime.js';
 
@@ -39,6 +41,8 @@ export function listIncidentsForUser(query: ListIncidentsQuery, user: AuthUser) 
 		...(query.priority ? { priority: query.priority } : {}),
 		...(query.q ? { title: { contains: query.q, mode: 'insensitive' } } : {}),
 		...(query.assigneeId ? { assigneeId: query.assigneeId === 'unassigned' ? null : query.assigneeId } : {}),
+		// Overdue = past its due date and not yet resolved/closed.
+		...(query.overdue ? { dueDate: { lt: new Date() }, status: { notIn: [Status.RESOLVED, Status.CLOSED] } } : {}),
 		// Reporters only ever see their own incidents.
 		...(user.role === Role.REPORTER ? { reporterId: user.id } : {}),
 	};
@@ -64,6 +68,11 @@ export async function updateIncidentByAdmin(id: string, input: UpdateIncidentInp
 		throw ApiError.notFound('Incident not found');
 	}
 
+	// Optimistic concurrency — reject if the incident changed since the client last read it.
+	if (input.expectedUpdatedAt && new Date(input.expectedUpdatedAt).getTime() !== existing.updatedAt.getTime()) {
+		throw ApiError.conflict('This incident was changed by someone else. Refresh and try again.');
+	}
+
 	if (input.assigneeId) {
 		const assignee = await findUserExists(input.assigneeId);
 		if (!assignee) {
@@ -75,8 +84,19 @@ export async function updateIncidentByAdmin(id: string, input: UpdateIncidentInp
 	const entries: AuditEntry[] = [];
 
 	if (input.status && input.status !== existing.status) {
+		if (!canTransition(existing.status, input.status)) {
+			throw ApiError.conflict(`Cannot change status from ${existing.status} to ${input.status}`);
+		}
 		data.status = input.status;
 		entries.push({ field: 'status', oldValue: existing.status, newValue: input.status });
+
+		// Stamp the resolution time when entering a closed-out state; clear it when reopened.
+		const closedOut = input.status === Status.RESOLVED || input.status === Status.CLOSED;
+		if (closedOut && !existing.resolvedAt) {
+			data.resolvedAt = new Date();
+		} else if (!closedOut && existing.resolvedAt) {
+			data.resolvedAt = null;
+		}
 	}
 	if (input.priority && input.priority !== existing.priority) {
 		data.priority = input.priority;
@@ -85,6 +105,13 @@ export async function updateIncidentByAdmin(id: string, input: UpdateIncidentInp
 	if (input.assigneeId !== undefined && input.assigneeId !== existing.assigneeId) {
 		data.assignee = input.assigneeId ? { connect: { id: input.assigneeId } } : { disconnect: true };
 		entries.push({ field: 'assignee', oldValue: existing.assigneeId, newValue: input.assigneeId });
+	}
+	if (input.dueDate !== undefined) {
+		const newDue = input.dueDate ? new Date(input.dueDate) : null;
+		if ((newDue?.getTime() ?? null) !== (existing.dueDate?.getTime() ?? null)) {
+			data.dueDate = newDue;
+			entries.push({ field: 'dueDate', oldValue: existing.dueDate?.toISOString() ?? null, newValue: newDue?.toISOString() ?? null });
+		}
 	}
 
 	// Nothing actually changed — return the current state without a no-op audit row.
@@ -95,6 +122,19 @@ export async function updateIncidentByAdmin(id: string, input: UpdateIncidentInp
 	const updated = await updateIncident(id, data, actor.id, entries);
 	emitIncidentsChanged();
 	return updated;
+}
+
+export async function listCommentsForIncident(id: string, user: AuthUser) {
+	// Reuse the read-authorization rules (404 for incidents the user can't see).
+	await getIncidentForUser(id, user);
+	return listComments(id);
+}
+
+export async function addCommentForIncident(id: string, body: string, user: AuthUser) {
+	await getIncidentForUser(id, user);
+	const comment = await createComment(id, user.id, body);
+	emitIncidentsChanged();
+	return comment;
 }
 
 /** Admin-only. Permanently deletes an incident (audit logs cascade). */

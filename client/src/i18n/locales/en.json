@@ -71,7 +71,9 @@
 			"status": "Status",
 			"reported": "Reported",
 			"actions": "Actions"
-		}
+		},
+		"overdue": "Overdue",
+		"overdueOnly": "Overdue only"
 	},
 	"form": {
 		"title": "Title",
@@ -101,7 +103,9 @@
 		"activity": "Activity",
 		"noActivity": "No activity yet.",
 		"changeEntry": "{{actor}} changed {{field}} from {{from}} to {{to}}",
-		"delete": "Delete incident"
+		"delete": "Delete incident",
+		"dueDate": "Due date",
+		"resolvedAt": "Resolved at"
 	},
 	"confirm": {
 		"deleteTitle": "Delete this incident?",
@@ -115,6 +119,14 @@
 		"incidentDeleted": "Incident deleted",
 		"deleteFailed": "Failed to delete incident",
 		"aiApplied": "AI suggestions applied",
-		"aiFailed": "AI suggestion failed"
+		"aiFailed": "AI suggestion failed",
+		"updateConflict": "This incident was changed elsewhere — refreshing.",
+		"commentFailed": "Couldn't post comment"
+	},
+	"comments": {
+		"title": "Comments",
+		"empty": "No comments yet.",
+		"placeholder": "Add a comment…",
+		"post": "Post comment"
 	}
 }

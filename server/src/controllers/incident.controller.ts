@@ -1,8 +1,8 @@
 import { asyncHandler } from '../lib/async-handler.js';
-import { createIncidentForUser, deleteIncidentByAdmin, getIncidentForUser, getStatsForUser, listIncidentsForUser, updateIncidentByAdmin } from '../services/incident.service.js';
+import { addCommentForIncident, createIncidentForUser, deleteIncidentByAdmin, getIncidentForUser, getStatsForUser, listCommentsForIncident, listIncidentsForUser, updateIncidentByAdmin } from '../services/incident.service.js';
 import { triageIncident } from '../services/triage.service.js';
 import { isTriageEnabled } from '../lib/gemini.js';
-import { type CreateIncidentInput, type ListIncidentsQuery, type TriageInput, type UpdateIncidentInput } from '../schemas/incident.schema.js';
+import { type AddCommentInput, type CreateIncidentInput, type ListIncidentsQuery, type TriageInput, type UpdateIncidentInput } from '../schemas/incident.schema.js';
 
 export const listIncidentsHandler = asyncHandler(async (req, res) => {
 	const result = await listIncidentsForUser(req.query as unknown as ListIncidentsQuery, req.user!);
@@ -41,4 +41,14 @@ export const updateIncidentHandler = asyncHandler(async (req, res) => {
 export const deleteIncidentHandler = asyncHandler(async (req, res) => {
 	await deleteIncidentByAdmin(req.params.id);
 	res.status(204).end();
+});
+
+export const listCommentsHandler = asyncHandler(async (req, res) => {
+	const comments = await listCommentsForIncident(req.params.id, req.user!);
+	res.json({ comments });
+});
+
+export const addCommentHandler = asyncHandler(async (req, res) => {
+	const comment = await addCommentForIncident(req.params.id, (req.body as AddCommentInput).body, req.user!);
+	res.status(201).json({ comment });
 });
