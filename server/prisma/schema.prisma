@@ -88,6 +88,7 @@ model Comment {
   author     User     @relation(fields: [authorId], references: [id])
   authorId   String
   body       String
+  internal   Boolean  @default(false)
   createdAt  DateTime @default(now())
 
   @@index([incidentId])

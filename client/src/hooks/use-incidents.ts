@@ -166,7 +166,7 @@ export function useComments(id: string) {
 export function useAddComment(id: string) {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: (body: string) => incidentsApi.addComment(id, body),
+		mutationFn: ({ body, internal }: { body: string; internal: boolean }) => incidentsApi.addComment(id, body, internal),
 		onSuccess: (comment) => {
 			queryClient.setQueryData<Comment[]>(incidentKeys.comments(id), (prev) => [...(prev ?? []), comment]);
 		},

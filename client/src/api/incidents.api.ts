@@ -93,7 +93,7 @@ export async function listComments(id: string): Promise<Comment[]> {
 	return data.comments;
 }
 
-export async function addComment(id: string, body: string): Promise<Comment> {
-	const { data } = await http.post<{ comment: Comment }>(`/incidents/${id}/comments`, { body });
+export async function addComment(id: string, body: string, internal: boolean): Promise<Comment> {
+	const { data } = await http.post<{ comment: Comment }>(`/incidents/${id}/comments`, { body, internal });
 	return data.comment;
 }

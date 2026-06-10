@@ -162,12 +162,15 @@ export async function updateIncidentByAdmin(id: string, input: UpdateIncidentInp
 export async function listCommentsForIncident(id: string, user: AuthUser) {
 	// Reuse the read-authorization rules (404 for incidents the user can't see).
 	await getIncidentForUser(id, user);
-	return listComments(id);
+	// Internal notes are visible to admins only.
+	return listComments(id, user.role === Role.ADMIN);
 }
 
-export async function addCommentForIncident(id: string, body: string, user: AuthUser) {
+export async function addCommentForIncident(id: string, body: string, internal: boolean, user: AuthUser) {
 	await getIncidentForUser(id, user);
-	const comment = await createComment(id, user.id, body);
+	// Only admins can post internal notes.
+	const isInternal = internal && user.role === Role.ADMIN;
+	const comment = await createComment(id, user.id, body, isInternal);
 	emitIncidentsChanged();
 	return comment;
 }

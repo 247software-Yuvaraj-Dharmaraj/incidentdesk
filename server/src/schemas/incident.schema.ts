@@ -24,6 +24,7 @@ export const updateIncidentSchema = z
 
 export const addCommentSchema = z.object({
 	body: z.string().trim().min(1, 'Comment cannot be empty').max(2000),
+	internal: z.boolean().optional().default(false),
 });
 
 export const bulkUpdateSchema = z

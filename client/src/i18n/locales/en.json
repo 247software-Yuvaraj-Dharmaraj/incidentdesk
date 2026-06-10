@@ -147,7 +147,9 @@
 		"title": "Comments",
 		"empty": "No comments yet.",
 		"placeholder": "Add a comment…",
-		"post": "Post comment"
+		"post": "Post comment",
+		"internal": "Internal",
+		"internalNote": "Internal note (admins only)"
 	},
 	"errors": {
 		"title": "Something went wrong",

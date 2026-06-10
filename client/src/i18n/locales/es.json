@@ -147,7 +147,9 @@
 		"title": "Comentarios",
 		"empty": "Aún no hay comentarios.",
 		"placeholder": "Añade un comentario…",
-		"post": "Publicar comentario"
+		"post": "Publicar comentario",
+		"internal": "Interno",
+		"internalNote": "Nota interna (solo admins)"
 	},
 	"errors": {
 		"title": "Algo salió mal",

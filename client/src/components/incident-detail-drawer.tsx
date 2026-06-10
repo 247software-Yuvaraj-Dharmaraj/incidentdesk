@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trash2 } from 'lucide-react';
-import { useAddComment, useComments, useDeleteIncident, useIncident, useUpdateIncident } from '@/hooks/use-incidents';
+import { useDeleteIncident, useIncident, useUpdateIncident } from '@/hooks/use-incidents';
 import { useUsers } from '@/hooks/use-users';
 import { useAuth } from '@/context/auth-context';
 import { selectableStatuses } from '@/lib/incident-status';
 import { StatusBadge, PriorityBadge, OverdueBadge } from '@/components/badges';
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { CommentThread } from '@/components/comment-thread';
 import { Drawer } from '@/components/ui/drawer';
 import { Avatar } from '@/components/ui/avatar';
 import { Select } from '@/components/ui/select';
@@ -143,7 +144,7 @@ export function IncidentDetailDrawer({ id, onClose }: { id: string; onClose: () 
 
 					{tab === 'activity' && <ActivityTimeline incident={incident} />}
 
-					{tab === 'comments' && <CommentsSection incidentId={id} />}
+					{tab === 'comments' && <CommentThread incidentId={id} />}
 				</div>
 			)}
 
@@ -166,62 +167,6 @@ function ActivityTimeline({ incident }: { incident: NonNullable<ReturnType<typeo
 				</li>
 			))}
 		</ol>
-	);
-}
-
-function CommentsSection({ incidentId }: { incidentId: string }) {
-	const { t, i18n } = useTranslation();
-	const { data: comments, isLoading } = useComments(incidentId);
-	const addComment = useAddComment(incidentId);
-	const [body, setBody] = useState('');
-
-	async function submit(e: React.FormEvent) {
-		e.preventDefault();
-		const trimmed = body.trim();
-		if (!trimmed) return;
-		try {
-			await addComment.mutateAsync(trimmed);
-			setBody('');
-		} catch {
-			/* error toast handled in the hook */
-		}
-	}
-
-	return (
-		<div>
-			{isLoading ? (
-				<div className="h-16 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" role="status" aria-live="polite" />
-			) : comments && comments.length > 0 ? (
-				<ul className="space-y-3">
-					{comments.map((c) => (
-						<li key={c.id} className="rounded-lg border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
-							<div className="flex items-center justify-between gap-2">
-								<Avatar name={c.author.fullName} />
-								<span className="text-xs text-slate-400 dark:text-slate-500">{new Date(c.createdAt).toLocaleString(i18n.resolvedLanguage)}</span>
-							</div>
-							<p className="mt-1 text-sm whitespace-pre-wrap text-slate-600 dark:text-slate-300">{c.body}</p>
-						</li>
-					))}
-				</ul>
-			) : (
-				<p className="text-sm text-slate-400 dark:text-slate-500">{t('comments.empty')}</p>
-			)}
-
-			<form onSubmit={submit} className="mt-3 flex flex-col gap-2">
-				<textarea
-					rows={3}
-					value={body}
-					onChange={(e) => setBody(e.target.value)}
-					maxLength={2000}
-					placeholder={t('comments.placeholder')}
-					aria-label={t('comments.placeholder')}
-					className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-slate-700"
-				/>
-				<Button type="submit" size="sm" className="self-start" loading={addComment.isPending} disabled={!body.trim()}>
-					{t('comments.post')}
-				</Button>
-			</form>
-		</div>
 	);
 }
 

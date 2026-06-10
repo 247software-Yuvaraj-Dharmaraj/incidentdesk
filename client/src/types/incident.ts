@@ -20,6 +20,7 @@ export interface AuditLog {
 export interface Comment {
 	id: string;
 	body: string;
+	internal: boolean;
 	author: UserPreview;
 	createdAt: string;
 }

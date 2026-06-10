@@ -64,6 +64,7 @@ export const listCommentsHandler = asyncHandler(async (req, res) => {
 });
 
 export const addCommentHandler = asyncHandler(async (req, res) => {
-	const comment = await addCommentForIncident(req.params.id, (req.body as AddCommentInput).body, req.user!);
+	const { body, internal } = req.body as AddCommentInput;
+	const comment = await addCommentForIncident(req.params.id, body, internal, req.user!);
 	res.status(201).json({ comment });
 });
