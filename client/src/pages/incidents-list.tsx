@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useMatch, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { createColumnHelper } from '@tanstack/react-table';
 import { LayoutGrid, Pencil, Plus, Search, Table2, Trash2 } from 'lucide-react';
@@ -15,6 +15,8 @@ import { DataGrid } from '@/components/ui/data-grid';
 import { Select } from '@/components/ui/select';
 import { Button, buttonClasses } from '@/components/ui/button';
 import { ActionMenu } from '@/components/ui/action-menu';
+import { IncidentDetailDrawer } from '@/components/incident-detail-drawer';
+import { IncidentCreateDrawer } from '@/components/incident-create-drawer';
 import { INCIDENT_TYPES, PRIORITIES, STATUSES, isOverdue, type Incident, type IncidentFilters, type IncidentType, type Priority, type Status } from '@/types/incident';
 
 const PRIORITY_RANK: Record<Priority, number> = { LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 3 };
@@ -28,6 +30,8 @@ type View = 'table' | 'board';
 export function IncidentsListPage() {
 	const { t, i18n } = useTranslation();
 	const navigate = useNavigate();
+	const isNew = Boolean(useMatch('/incidents/new'));
+	const { id: detailId } = useParams();
 	const { user } = useAuth();
 	const isAdmin = user?.role === 'ADMIN';
 
@@ -239,6 +243,9 @@ export function IncidentsListPage() {
 				loading={remove.isPending}
 				destructive
 			/>
+
+			{isNew && <IncidentCreateDrawer onClose={() => navigate('/incidents')} onCreated={(id) => navigate(`/incidents/${id}`)} />}
+			{detailId && <IncidentDetailDrawer id={detailId} onClose={() => navigate('/incidents')} />}
 		</div>
 	);
 }

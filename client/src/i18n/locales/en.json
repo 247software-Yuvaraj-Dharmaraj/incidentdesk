@@ -111,7 +111,13 @@
 		"changeEntry": "{{actor}} changed {{field}} from {{from}} to {{to}}",
 		"delete": "Delete incident",
 		"dueDate": "Due date",
-		"resolvedAt": "Resolved at"
+		"resolvedAt": "Resolved at",
+		"title": "Incident",
+		"tab": {
+			"overview": "Overview",
+			"activity": "Activity",
+			"comments": "Comments"
+		}
 	},
 	"confirm": {
 		"deleteTitle": "Delete this incident?",

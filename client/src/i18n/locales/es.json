@@ -111,7 +111,13 @@
 		"changeEntry": "{{actor}} cambió {{field}} de {{from}} a {{to}}",
 		"delete": "Eliminar incidente",
 		"dueDate": "Fecha límite",
-		"resolvedAt": "Resuelto el"
+		"resolvedAt": "Resuelto el",
+		"title": "Incidencia",
+		"tab": {
+			"overview": "Resumen",
+			"activity": "Actividad",
+			"comments": "Comentarios"
+		}
 	},
 	"confirm": {
 		"deleteTitle": "¿Eliminar este incidente?",

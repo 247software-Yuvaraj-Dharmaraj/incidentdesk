@@ -8,8 +8,6 @@ const LoginPage = lazy(() => import('@/pages/login').then((m) => ({ default: m.L
 const SignupPage = lazy(() => import('@/pages/signup').then((m) => ({ default: m.SignupPage })));
 const DashboardPage = lazy(() => import('@/pages/dashboard').then((m) => ({ default: m.DashboardPage })));
 const IncidentsListPage = lazy(() => import('@/pages/incidents-list').then((m) => ({ default: m.IncidentsListPage })));
-const IncidentNewPage = lazy(() => import('@/pages/incident-new').then((m) => ({ default: m.IncidentNewPage })));
-const IncidentDetailPage = lazy(() => import('@/pages/incident-detail').then((m) => ({ default: m.IncidentDetailPage })));
 const NotFoundPage = lazy(() => import('@/pages/not-found').then((m) => ({ default: m.NotFoundPage })));
 
 function App() {
@@ -24,8 +22,8 @@ function App() {
 						<Route element={<AppLayout />}>
 							<Route path="/dashboard" element={<DashboardPage />} />
 							<Route path="/incidents" element={<IncidentsListPage />} />
-							<Route path="/incidents/new" element={<IncidentNewPage />} />
-							<Route path="/incidents/:id" element={<IncidentDetailPage />} />
+							<Route path="/incidents/new" element={<IncidentsListPage />} />
+							<Route path="/incidents/:id" element={<IncidentsListPage />} />
 						</Route>
 					</Route>
 
