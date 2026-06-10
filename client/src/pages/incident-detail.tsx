@@ -85,9 +85,9 @@ export function IncidentDetailPage() {
 				<Card className="mt-6 p-6">
 					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-slate-100">{t('detail.adminControls')}</h2>
 					<div className="grid grid-cols-3 gap-4">
-						<Select label={t('detail.status')} value={incident.status} disabled={update.isPending} options={toOptions(STATUSES)} onChange={(e) => update.mutate({ id, payload: { status: e.target.value as Status } })} />
-						<Select label={t('detail.priority')} value={incident.priority} disabled={update.isPending} options={toOptions(PRIORITIES)} onChange={(e) => update.mutate({ id, payload: { priority: e.target.value as Priority } })} />
-						<Select label={t('detail.assignee')} value={incident.assigneeId ?? ''} disabled={update.isPending} options={assigneeOptions} onChange={(e) => update.mutate({ id, payload: { assigneeId: e.target.value || null } })} />
+						<Select label={t('detail.status')} value={incident.status} disabled={update.isPending} options={toOptions(STATUSES)} onChange={(v) => update.mutate({ id, payload: { status: v as Status } })} />
+						<Select label={t('detail.priority')} value={incident.priority} disabled={update.isPending} options={toOptions(PRIORITIES)} onChange={(v) => update.mutate({ id, payload: { priority: v as Priority } })} />
+						<Select label={t('detail.assignee')} value={incident.assigneeId ?? ''} disabled={update.isPending} options={assigneeOptions} onChange={(v) => update.mutate({ id, payload: { assigneeId: v || null } })} />
 					</div>
 					{update.isError && (
 						<p role="alert" className="mt-3 text-sm text-red-500 dark:text-red-400">

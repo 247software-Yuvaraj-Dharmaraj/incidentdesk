@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +28,7 @@ export function IncidentNewPage() {
 
 	const {
 		register,
+		control,
 		handleSubmit,
 		setValue,
 		watch,
@@ -93,8 +94,8 @@ export function IncidentNewPage() {
 			)}
 
 			<div className="grid grid-cols-2 gap-4">
-				<Select label={t('form.type')} options={toOptions(INCIDENT_TYPES)} {...register('type')} />
-				<Select label={t('form.priority')} options={toOptions(PRIORITIES)} {...register('priority')} />
+				<Controller name="type" control={control} render={({ field }) => <Select label={t('form.type')} options={toOptions(INCIDENT_TYPES)} value={field.value} onChange={field.onChange} />} />
+				<Controller name="priority" control={control} render={({ field }) => <Select label={t('form.priority')} options={toOptions(PRIORITIES)} value={field.value} onChange={field.onChange} />} />
 			</div>
 
 			<div className="flex flex-col gap-1">

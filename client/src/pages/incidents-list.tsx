@@ -166,10 +166,10 @@ export function IncidentsListPage() {
 						className="w-full rounded-lg border border-slate-300 bg-white py-2 pr-3 pl-9 text-sm text-slate-900 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-slate-700"
 					/>
 				</div>
-				<Select value={status} onChange={(e) => setStatus(e.target.value as Status | '')} placeholder={t('incidents.allStatuses')} options={toOptions(STATUSES)} />
-				<Select value={type} onChange={(e) => setType(e.target.value as IncidentType | '')} placeholder={t('incidents.allTypes')} options={toOptions(INCIDENT_TYPES)} />
-				<Select value={priority} onChange={(e) => setPriority(e.target.value as Priority | '')} placeholder={t('incidents.allPriorities')} options={toOptions(PRIORITIES)} />
-				{isAdmin && <Select value={assigneeId} onChange={(e) => setAssigneeId(e.target.value)} placeholder={t('incidents.allAssignees')} options={assigneeOptions} />}
+				<Select value={status} onChange={(v) => setStatus(v as Status | '')} placeholder={t('incidents.allStatuses')} options={toOptions(STATUSES)} className="min-w-40" />
+				<Select value={type} onChange={(v) => setType(v as IncidentType | '')} placeholder={t('incidents.allTypes')} options={toOptions(INCIDENT_TYPES)} className="min-w-40" />
+				<Select value={priority} onChange={(v) => setPriority(v as Priority | '')} placeholder={t('incidents.allPriorities')} options={toOptions(PRIORITIES)} className="min-w-40" />
+				{isAdmin && <Select value={assigneeId} onChange={(v) => setAssigneeId(v)} placeholder={t('incidents.allAssignees')} options={assigneeOptions} className="min-w-44" />}
 				{hasFilters && (
 					<Button variant="ghost" size="sm" onClick={clearFilters}>
 						{t('incidents.clear')}
