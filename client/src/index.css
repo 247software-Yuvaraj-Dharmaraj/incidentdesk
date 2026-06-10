@@ -10,6 +10,18 @@
 	--color-brand-fg: #ffffff;
 }
 
+/* Tailwind v4's Preflight sets buttons to cursor:default. Restore the pointer
+   cursor on interactive elements (skipping disabled ones). */
+@layer base {
+	button:not(:disabled),
+	[role='button']:not([aria-disabled='true']),
+	[role='menuitem'],
+	summary,
+	label[for] {
+		cursor: pointer;
+	}
+}
+
 html {
 	color-scheme: light dark;
 }
