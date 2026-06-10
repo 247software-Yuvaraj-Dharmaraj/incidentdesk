@@ -3,12 +3,23 @@
 /* Enable `dark:` utilities when an ancestor (or html) has data-theme="dark". */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
+/* Brand palette — mirrors the design-system app's primary blue. */
+@theme {
+	--color-brand: #003d71;
+	--color-brand-hover: #00305c;
+	--color-brand-fg: #ffffff;
+}
+
 html {
 	color-scheme: light dark;
 }
 
 [data-theme='dark'] {
 	color-scheme: dark;
+	/* Lighter, lower-saturation blue reads better on dark surfaces (mirrors ui-service). */
+	--color-brand: #7ca4bb;
+	--color-brand-hover: #a9c7d6;
+	--color-brand-fg: #14233a;
 }
 
 /* Subtle, theme-aware scrollbar for scrollable panels (board columns, etc.). */

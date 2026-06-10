@@ -27,7 +27,7 @@ export function AppLayout() {
 			<header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
 				<div className="mx-auto flex max-w-[1800px] items-center justify-between px-6 py-3 lg:px-8">
 					<div className="flex items-center gap-6">
-						<Link to="/dashboard" className="text-lg font-bold text-slate-900 dark:text-slate-100">
+						<Link to="/dashboard" className="text-brand text-lg font-bold">
 							IncidentDesk
 						</Link>
 						<nav aria-label={t('nav.primary')} className="flex items-center gap-1 text-sm">
@@ -39,7 +39,7 @@ export function AppLayout() {
 									key={item.to}
 									to={item.to}
 									className={({ isActive }) =>
-										`rounded-md px-2 py-1 transition ${isActive ? 'bg-slate-100 font-medium text-slate-900 dark:bg-slate-800 dark:text-slate-100' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'}`
+										`rounded-md px-2 py-1 transition ${isActive ? 'bg-brand/10 text-brand font-medium' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'}`
 									}
 								>
 									{item.label}
