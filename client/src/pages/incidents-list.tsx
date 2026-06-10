@@ -138,7 +138,7 @@ export function IncidentsListPage() {
 										type="button"
 										onClick={() => setView(v)}
 										aria-pressed={view === v}
-										className={`flex items-center gap-1.5 px-3 py-1.5 font-medium transition ${view === v ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+										className={`flex items-center gap-1.5 px-3 py-1.5 font-medium transition ${view === v ? 'bg-brand text-brand-fg' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'}`}
 									>
 										<Icon className="h-4 w-4" />
 										{t(v === 'table' ? 'incidents.viewTable' : 'incidents.viewBoard')}
