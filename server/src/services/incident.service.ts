@@ -3,7 +3,7 @@ import { ApiError } from '../lib/api-error.js';
 import { canTransition } from '../lib/incident-status.js';
 import { type AuthUser } from '../types/auth.js';
 import { type CreateIncidentInput, type ListIncidentsQuery, type UpdateIncidentInput } from '../schemas/incident.schema.js';
-import { type AuditEntry, countIncidentsByStatus, createIncident, deleteIncidentById, findIncidentById, listIncidents, updateIncident } from '../repos/incident.repo.js';
+import { type AuditEntry, countIncidentsByStatus, createIncident, deleteIncidentById, findIncidentById, findResolvedTimings, findTimingsSince, listIncidents, updateIncident } from '../repos/incident.repo.js';
 import { createComment, listComments } from '../repos/comment.repo.js';
 import { findUserExists } from '../repos/user.repo.js';
 import { emitIncidentsChanged } from '../lib/realtime.js';
@@ -48,6 +48,41 @@ export function listIncidentsForUser(query: ListIncidentsQuery, user: AuthUser) 
 	};
 
 	return listIncidents({ where, cursor: query.cursor, limit: query.limit });
+}
+
+const TREND_DAYS = 14;
+const dayKey = (d: Date) => d.toISOString().slice(0, 10);
+
+/** Mean-time-to-resolution (hours) and a 14-day created/resolved trend, role-scoped. */
+export async function getMetricsForUser(user: AuthUser) {
+	const where: Prisma.IncidentWhereInput = user.role === Role.REPORTER ? { reporterId: user.id } : {};
+
+	const resolved = await findResolvedTimings(where);
+	const mttrHours = resolved.length ? resolved.reduce((sum, i) => sum + (i.resolvedAt!.getTime() - i.createdAt.getTime()), 0) / resolved.length / 3_600_000 : null;
+
+	const since = new Date();
+	since.setUTCHours(0, 0, 0, 0);
+	since.setUTCDate(since.getUTCDate() - (TREND_DAYS - 1));
+
+	// Seed every day in the window so the chart has no gaps.
+	const buckets = new Map<string, { date: string; created: number; resolved: number }>();
+	for (let i = 0; i < TREND_DAYS; i++) {
+		const d = new Date(since);
+		d.setUTCDate(since.getUTCDate() + i);
+		buckets.set(dayKey(d), { date: dayKey(d), created: 0, resolved: 0 });
+	}
+
+	const recent = await findTimingsSince(where, since);
+	for (const row of recent) {
+		const created = buckets.get(dayKey(row.createdAt));
+		if (created) created.created += 1;
+		if (row.resolvedAt) {
+			const res = buckets.get(dayKey(row.resolvedAt));
+			if (res) res.resolved += 1;
+		}
+	}
+
+	return { mttrHours, resolvedCount: resolved.length, trend: [...buckets.values()] };
 }
 
 export async function getIncidentForUser(id: string, user: AuthUser) {

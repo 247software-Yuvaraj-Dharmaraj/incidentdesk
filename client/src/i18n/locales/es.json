@@ -42,7 +42,12 @@
 		"open": "Abiertos",
 		"inProgress": "En progreso",
 		"resolved": "Resueltos",
-		"viewAll": "Ver todos los incidentes →"
+		"viewAll": "Ver todos los incidentes →",
+		"mttr": "Resolución media",
+		"trend": "Actividad (últimos 14 días)",
+		"created": "Creados",
+		"emptyTitle": "Aún no hay incidencias",
+		"emptyHint": "Crea tu primera incidencia para ver estadísticas y tendencias aquí."
 	},
 	"incidents": {
 		"title": "Incidentes",
@@ -73,7 +78,8 @@
 			"actions": "Acciones"
 		},
 		"overdue": "Vencido",
-		"overdueOnly": "Solo vencidos"
+		"overdueOnly": "Solo vencidos",
+		"showing": "Mostrando {{shown}} de {{total}}"
 	},
 	"form": {
 		"title": "Título",
@@ -128,5 +134,16 @@
 		"empty": "Aún no hay comentarios.",
 		"placeholder": "Añade un comentario…",
 		"post": "Publicar comentario"
+	},
+	"errors": {
+		"title": "Algo salió mal",
+		"body": "Ocurrió un error inesperado. Por favor recarga la página.",
+		"reload": "Recargar",
+		"generic": "Algo salió mal"
+	},
+	"notFound": {
+		"title": "Página no encontrada",
+		"body": "La página que buscas no existe o fue movida.",
+		"back": "Volver al panel"
 	}
 }

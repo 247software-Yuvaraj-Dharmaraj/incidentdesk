@@ -5,7 +5,7 @@ import { requireAuth } from '../middleware/auth.middleware.js';
 import { requireRole } from '../middleware/require-role.js';
 import { validate } from '../middleware/validate.js';
 import { addCommentSchema, createIncidentSchema, listIncidentsQuerySchema, triageSchema, updateIncidentSchema } from '../schemas/incident.schema.js';
-import { addCommentHandler, createIncidentHandler, deleteIncidentHandler, getIncidentHandler, listCommentsHandler, listIncidentsHandler, statsHandler, triageEnabledHandler, triageHandler, updateIncidentHandler } from '../controllers/incident.controller.js';
+import { addCommentHandler, createIncidentHandler, deleteIncidentHandler, getIncidentHandler, listCommentsHandler, listIncidentsHandler, metricsHandler, statsHandler, triageEnabledHandler, triageHandler, updateIncidentHandler } from '../controllers/incident.controller.js';
 
 // Throttle AI triage to protect the (quota-limited) Gemini key from abuse.
 const triageLimiter = rateLimit({
@@ -31,6 +31,7 @@ router.use(requireAuth);
 
 router.get('/', validate(listIncidentsQuerySchema, 'query'), listIncidentsHandler);
 router.get('/stats', statsHandler);
+router.get('/metrics', metricsHandler);
 router.get('/triage/status', triageEnabledHandler);
 router.post('/triage', triageLimiter, validate(triageSchema), triageHandler);
 router.post('/', writeLimiter, validate(createIncidentSchema), createIncidentHandler);

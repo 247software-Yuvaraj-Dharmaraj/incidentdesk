@@ -1,6 +1,6 @@
 import { http } from './http';
 import { type CreateIncidentValues } from '@/schemas/incident.schema';
-import { type Comment, type Incident, type IncidentFilters, type IncidentPage } from '@/types/incident';
+import { type Comment, type Incident, type IncidentFilters, type IncidentMetrics, type IncidentPage } from '@/types/incident';
 
 interface ListParams extends IncidentFilters {
 	cursor?: string;
@@ -49,6 +49,11 @@ export interface IncidentStats {
 
 export async function getStats(): Promise<IncidentStats> {
 	const { data } = await http.get<IncidentStats>('/incidents/stats');
+	return data;
+}
+
+export async function getMetrics(): Promise<IncidentMetrics> {
+	const { data } = await http.get<IncidentMetrics>('/incidents/metrics');
 	return data;
 }
 

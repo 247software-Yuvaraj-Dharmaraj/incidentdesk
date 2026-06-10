@@ -26,7 +26,7 @@ const toOptions = (values: string[]) => values.map((v) => ({ label: v.replace('_
 type View = 'table' | 'board';
 
 export function IncidentsListPage() {
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
 	const navigate = useNavigate();
 	const { user } = useAuth();
 	const isAdmin = user?.role === 'ADMIN';
@@ -58,6 +58,7 @@ export function IncidentsListPage() {
 
 	const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useIncidents(filters);
 	const incidents = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
+	const total = data?.pages[0]?.total ?? 0;
 	const hasFilters = Boolean(debouncedSearch || status || type || priority || assigneeId || overdue);
 
 	useEffect(() => {
@@ -84,7 +85,7 @@ export function IncidentsListPage() {
 			columnHelper.accessor('type', { header: t('incidents.col.type'), cell: (info) => <span className="text-slate-500 dark:text-slate-400">{info.getValue()}</span> }),
 			columnHelper.accessor((row) => PRIORITY_RANK[row.priority], { id: 'priority', header: t('incidents.col.priority'), cell: (info) => <PriorityBadge priority={info.row.original.priority} /> }),
 			columnHelper.accessor((row) => STATUS_RANK[row.status], { id: 'status', header: t('incidents.col.status'), cell: (info) => <StatusBadge status={info.row.original.status} /> }),
-			columnHelper.accessor((row) => new Date(row.createdAt).getTime(), { id: 'reported', header: t('incidents.col.reported'), cell: (info) => <span className="text-slate-500 dark:text-slate-400">{new Date(info.row.original.createdAt).toLocaleDateString()}</span> }),
+			columnHelper.accessor((row) => new Date(row.createdAt).getTime(), { id: 'reported', header: t('incidents.col.reported'), cell: (info) => <span className="text-slate-500 dark:text-slate-400">{new Date(info.row.original.createdAt).toLocaleDateString(i18n.resolvedLanguage)}</span> }),
 			...(isAdmin
 				? [
 						columnHelper.display({
@@ -105,7 +106,7 @@ export function IncidentsListPage() {
 					]
 				: []),
 		],
-		[t, isAdmin, navigate]
+		[t, i18n.resolvedLanguage, isAdmin, navigate]
 	);
 
 	function clearFilters() {
@@ -213,7 +214,12 @@ export function IncidentsListPage() {
 				</div>
 			)}
 
-			{incidents.length > 0 && (view === 'board' ? <IncidentBoard incidents={incidents} canDrag={isAdmin} /> : <DataGrid columns={columns} data={incidents} />)}
+			{incidents.length > 0 && (
+				<>
+					<p className="mb-2 text-xs text-slate-500 dark:text-slate-400">{t('incidents.showing', { shown: incidents.length, total })}</p>
+					{view === 'board' ? <IncidentBoard incidents={incidents} canDrag={isAdmin} /> : <DataGrid columns={columns} data={incidents} />}
+				</>
+			)}
 
 			{view === 'table' && hasNextPage && (
 				<div className="mt-4 text-center">

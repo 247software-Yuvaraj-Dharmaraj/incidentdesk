@@ -1,5 +1,5 @@
 import { asyncHandler } from '../lib/async-handler.js';
-import { addCommentForIncident, createIncidentForUser, deleteIncidentByAdmin, getIncidentForUser, getStatsForUser, listCommentsForIncident, listIncidentsForUser, updateIncidentByAdmin } from '../services/incident.service.js';
+import { addCommentForIncident, createIncidentForUser, deleteIncidentByAdmin, getIncidentForUser, getMetricsForUser, getStatsForUser, listCommentsForIncident, listIncidentsForUser, updateIncidentByAdmin } from '../services/incident.service.js';
 import { triageIncident } from '../services/triage.service.js';
 import { isTriageEnabled } from '../lib/gemini.js';
 import { type AddCommentInput, type CreateIncidentInput, type ListIncidentsQuery, type TriageInput, type UpdateIncidentInput } from '../schemas/incident.schema.js';
@@ -12,6 +12,11 @@ export const listIncidentsHandler = asyncHandler(async (req, res) => {
 export const statsHandler = asyncHandler(async (req, res) => {
 	const stats = await getStatsForUser(req.user!);
 	res.json(stats);
+});
+
+export const metricsHandler = asyncHandler(async (req, res) => {
+	const metrics = await getMetricsForUser(req.user!);
+	res.json(metrics);
 });
 
 export const triageEnabledHandler = asyncHandler(async (_req, res) => {

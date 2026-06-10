@@ -89,7 +89,7 @@ function Card({ incident, canDrag }: { incident: Incident; canDrag: boolean }) {
 			{...attributes}
 			className={`rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 ${canDrag ? 'cursor-grab active:cursor-grabbing' : ''} ${isDragging ? 'opacity-50' : ''}`}
 		>
-			<Link to={`/incidents/${incident.id}`} className="block text-sm font-medium text-slate-900 hover:underline dark:text-slate-100" onPointerDown={(e) => e.stopPropagation()}>
+			<Link to={`/incidents/${incident.id}`} title={incident.title} className="line-clamp-2 block text-sm font-medium text-slate-900 hover:underline dark:text-slate-100" onPointerDown={(e) => e.stopPropagation()}>
 				{incident.title}
 			</Link>
 			{isOverdue(incident) && (

@@ -42,7 +42,12 @@
 		"open": "Open",
 		"inProgress": "In progress",
 		"resolved": "Resolved",
-		"viewAll": "View all incidents →"
+		"viewAll": "View all incidents →",
+		"mttr": "Avg. resolution",
+		"trend": "Activity (last 14 days)",
+		"created": "Created",
+		"emptyTitle": "No incidents yet",
+		"emptyHint": "Create your first incident to see stats and trends here."
 	},
 	"incidents": {
 		"title": "Incidents",
@@ -73,7 +78,8 @@
 			"actions": "Actions"
 		},
 		"overdue": "Overdue",
-		"overdueOnly": "Overdue only"
+		"overdueOnly": "Overdue only",
+		"showing": "Showing {{shown}} of {{total}}"
 	},
 	"form": {
 		"title": "Title",
@@ -128,5 +134,16 @@
 		"empty": "No comments yet.",
 		"placeholder": "Add a comment…",
 		"post": "Post comment"
+	},
+	"errors": {
+		"title": "Something went wrong",
+		"body": "An unexpected error occurred. Please reload the page.",
+		"reload": "Reload",
+		"generic": "Something went wrong"
+	},
+	"notFound": {
+		"title": "Page not found",
+		"body": "The page you're looking for doesn't exist or has moved.",
+		"back": "Back to dashboard"
 	}
 }

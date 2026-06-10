@@ -30,6 +30,13 @@ export function useIncidentStats() {
 	});
 }
 
+export function useIncidentMetrics() {
+	return useQuery({
+		queryKey: ['incidents', 'metrics'],
+		queryFn: incidentsApi.getMetrics,
+	});
+}
+
 export function useIncident(id: string) {
 	return useQuery({
 		queryKey: incidentKeys.detail(id),

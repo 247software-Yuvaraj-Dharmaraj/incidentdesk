@@ -59,6 +59,19 @@ export function isOverdue(incident: Pick<Incident, 'dueDate' | 'status'>): boole
 export interface IncidentPage {
 	items: Incident[];
 	nextCursor: string | null;
+	total: number;
+}
+
+export interface TrendPoint {
+	date: string;
+	created: number;
+	resolved: number;
+}
+
+export interface IncidentMetrics {
+	mttrHours: number | null;
+	resolvedCount: number;
+	trend: TrendPoint[];
 }
 
 export const INCIDENT_TYPES: IncidentType[] = ['INCIDENT', 'REQUEST', 'MAINTENANCE'];

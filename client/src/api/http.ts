@@ -1,4 +1,5 @@
 import axios from 'axios';
+import i18n from '@/i18n';
 
 export const http = axios.create({
 	baseURL: `${import.meta.env.VITE_API_URL}/api`,
@@ -24,7 +25,7 @@ http.interceptors.response.use(
 );
 
 /** Normalizes an axios error into a user-facing message. */
-export function getErrorMessage(error: unknown, fallback = 'Something went wrong'): string {
+export function getErrorMessage(error: unknown, fallback = i18n.t('errors.generic')): string {
 	if (axios.isAxiosError(error)) {
 		return error.response?.data?.error ?? fallback;
 	}

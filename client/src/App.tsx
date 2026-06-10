@@ -10,6 +10,7 @@ const DashboardPage = lazy(() => import('@/pages/dashboard').then((m) => ({ defa
 const IncidentsListPage = lazy(() => import('@/pages/incidents-list').then((m) => ({ default: m.IncidentsListPage })));
 const IncidentNewPage = lazy(() => import('@/pages/incident-new').then((m) => ({ default: m.IncidentNewPage })));
 const IncidentDetailPage = lazy(() => import('@/pages/incident-detail').then((m) => ({ default: m.IncidentDetailPage })));
+const NotFoundPage = lazy(() => import('@/pages/not-found').then((m) => ({ default: m.NotFoundPage })));
 
 function App() {
 	return (
@@ -29,7 +30,7 @@ function App() {
 					</Route>
 
 					<Route path="/" element={<Navigate to="/dashboard" replace />} />
-					<Route path="*" element={<Navigate to="/dashboard" replace />} />
+					<Route path="*" element={<NotFoundPage />} />
 				</Routes>
 			</Suspense>
 		</BrowserRouter>

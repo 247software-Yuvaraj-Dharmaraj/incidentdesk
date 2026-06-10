@@ -60,18 +60,38 @@ export function deleteIncidentById(id: string) {
 }
 
 export async function listIncidents({ where, cursor, limit }: ListArgs) {
-	// Fetch one extra row to determine whether another page exists.
-	const rows = await prisma.incident.findMany({
-		where,
-		include: incidentInclude,
-		orderBy: { createdAt: 'desc' },
-		take: limit + 1,
-		...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-	});
+	// Fetch one extra row to determine whether another page exists; count the full
+	// filtered set in parallel so the UI can show "showing N of total".
+	const [rows, total] = await Promise.all([
+		prisma.incident.findMany({
+			where,
+			include: incidentInclude,
+			orderBy: { createdAt: 'desc' },
+			take: limit + 1,
+			...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+		}),
+		prisma.incident.count({ where }),
+	]);
 
 	const hasMore = rows.length > limit;
 	const items = hasMore ? rows.slice(0, limit) : rows;
 	const nextCursor = hasMore ? items[items.length - 1].id : null;
 
-	return { items, nextCursor };
+	return { items, nextCursor, total };
+}
+
+/** Created/resolved timestamps of resolved incidents — for mean-time-to-resolution. */
+export function findResolvedTimings(where: Prisma.IncidentWhereInput) {
+	return prisma.incident.findMany({
+		where: { ...where, resolvedAt: { not: null } },
+		select: { createdAt: true, resolvedAt: true },
+	});
+}
+
+/** Incidents created or resolved since a date — for the activity trend chart. */
+export function findTimingsSince(where: Prisma.IncidentWhereInput, since: Date) {
+	return prisma.incident.findMany({
+		where: { ...where, OR: [{ createdAt: { gte: since } }, { resolvedAt: { gte: since } }] },
+		select: { createdAt: true, resolvedAt: true },
+	});
 }
