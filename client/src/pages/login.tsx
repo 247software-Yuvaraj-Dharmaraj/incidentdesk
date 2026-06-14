@@ -9,6 +9,7 @@ import { loginSchema, type LoginValues } from '@/schemas/auth.schema';
 import { TextField } from '@/components/ui/text-field';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/logo';
 
 export function LoginPage() {
 	const { login } = useAuth();
@@ -32,9 +33,10 @@ export function LoginPage() {
 	}
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
+		<div className="bg-canvas dark:bg-canvas-dark flex min-h-screen items-center justify-center px-4">
 			<Card className="w-full max-w-sm p-8 shadow-sm">
-				<h1 className="mb-1 text-2xl font-bold text-slate-900 dark:text-slate-100">{t('auth.welcomeBack')}</h1>
+				<Logo className="mb-6" />
+				<h1 className="mb-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{t('auth.welcomeBack')}</h1>
 				<p className="mb-6 text-sm text-slate-500 dark:text-slate-400">{t('auth.signInSubtitle')}</p>
 
 				{formError && (

@@ -351,7 +351,7 @@ function IncidentCardList({ incidents, isAdmin, onEdit, onDelete }: { incidents:
 	return (
 		<ul className={`flex flex-col ${listGap} lg:hidden`}>
 			{incidents.map((incident) => (
-				<li key={incident.id} className={`rounded-xl border border-slate-200 bg-white ${cardPad} dark:border-slate-800 dark:bg-slate-900`}>
+				<li key={incident.id} className={`rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md ${cardPad} dark:border-slate-800 dark:bg-slate-900`}>
 					<div className="flex items-start justify-between gap-2">
 						<Link to={`/incidents/${incident.id}`} title={incident.title} className={`font-medium text-slate-900 hover:underline dark:text-slate-100 ${compact ? 'text-sm' : ''}`}>
 							{incident.title}

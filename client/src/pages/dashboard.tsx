@@ -41,7 +41,7 @@ export function DashboardPage() {
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{t('dashboard.title')}</h1>
+			<h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{t('dashboard.title')}</h1>
 			<p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
 				{t('dashboard.welcome', { name: user?.fullName })} · <span className="font-medium text-slate-700 dark:text-slate-300">{user?.role}</span>
 			</p>
@@ -60,12 +60,12 @@ export function DashboardPage() {
 						{CARDS.map((card) => (
 							<Card key={card.key} className={cardPad}>
 								<p className="text-xs tracking-wide text-slate-400 uppercase dark:text-slate-500">{t(card.labelKey)}</p>
-								{isLoading ? <div className="mt-2 h-8 w-12 animate-pulse rounded bg-slate-100 dark:bg-slate-800" /> : <p className={`mt-1 font-bold ${valueText} ${card.accent}`}>{valueFor(card.key)}</p>}
+								{isLoading ? <div className="mt-2 h-8 w-12 animate-pulse rounded bg-slate-100 dark:bg-slate-800" /> : <p className={`mt-1 font-bold tracking-tight tabular-nums ${valueText} ${card.accent}`}>{valueFor(card.key)}</p>}
 							</Card>
 						))}
 						<Card className={cardPad}>
 							<p className="text-xs tracking-wide text-slate-400 uppercase dark:text-slate-500">{t('dashboard.mttr')}</p>
-							<p className={`text-brand mt-1 font-bold ${valueText}`}>{mttr ?? '—'}</p>
+							<p className={`text-brand mt-1 font-bold tracking-tight tabular-nums ${valueText}`}>{mttr ?? '—'}</p>
 						</Card>
 					</div>
 

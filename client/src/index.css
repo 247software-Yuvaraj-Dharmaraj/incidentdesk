@@ -8,6 +8,29 @@
 	--color-brand: #003d71;
 	--color-brand-hover: #00305c;
 	--color-brand-fg: #ffffff;
+
+	/* Warm off-white canvas — softer than cold slate, reads as hand-tuned. */
+	--color-canvas: #faf9f7;
+	--color-canvas-dark: #0b1120;
+
+	/* Inter as the primary UI face, with a graceful system fallback. */
+	--font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+@layer base {
+	html {
+		font-family: var(--font-sans);
+	}
+	body {
+		/* Crisp Inter rendering + a couple of tasteful OpenType features. */
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		font-feature-settings: 'cv11', 'ss01';
+		text-rendering: optimizeLegibility;
+	}
+	::selection {
+		background-color: color-mix(in srgb, var(--color-brand) 18%, transparent);
+	}
 }
 
 /* Gentle pulse for the branded loader logo. */

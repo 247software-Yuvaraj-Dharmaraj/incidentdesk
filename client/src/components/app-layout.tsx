@@ -7,6 +7,7 @@ import { useRealtime } from '@/hooks/use-realtime';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { DensityToggle } from '@/components/density-toggle';
+import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 
 export function AppLayout() {
@@ -38,15 +39,15 @@ export function AppLayout() {
 	) : null;
 
 	return (
-		<div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+		<div className="bg-canvas dark:bg-canvas-dark min-h-screen">
 			<a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-slate-900 focus:px-3 focus:py-2 focus:text-sm focus:text-white">
 				{t('common.skipToContent')}
 			</a>
 			<header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
 				<div className="mx-auto flex max-w-[1800px] items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
 					<div className="flex min-w-0 items-center gap-6">
-						<Link to="/dashboard" className="text-brand shrink-0 text-lg font-bold" onClick={() => setMenuOpen(false)}>
-							IncidentDesk
+						<Link to="/dashboard" className="shrink-0 rounded-lg focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none" onClick={() => setMenuOpen(false)} aria-label="IncidentDesk">
+							<Logo />
 						</Link>
 						<nav aria-label={t('nav.primary')} className="hidden items-center gap-1 text-sm lg:flex">
 							{navItems.map((item) => (
