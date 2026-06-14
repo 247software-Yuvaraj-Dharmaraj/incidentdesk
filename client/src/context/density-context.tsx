@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 type Density = 'comfortable' | 'compact';
 
@@ -32,7 +32,9 @@ export function DensityProvider({ children }: { children: ReactNode }) {
 		setDensity((prev) => (prev === 'compact' ? 'comfortable' : 'compact'));
 	}, []);
 
-	return <DensityContext.Provider value={{ density, toggleDensity, setDensity }}>{children}</DensityContext.Provider>;
+	const value = useMemo(() => ({ density, toggleDensity, setDensity }), [density, toggleDensity]);
+
+	return <DensityContext.Provider value={value}>{children}</DensityContext.Provider>;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

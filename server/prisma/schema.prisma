@@ -67,6 +67,10 @@ model Incident {
 
   @@index([reporterId])
   @@index([status])
+  @@index([assigneeId]) // assignee filter + "unassigned"
+  @@index([dueDate]) // overdue range filter
+  @@index([resolvedAt]) // MTTR / resolved-trend metrics
+  @@index([createdAt]) // list sort + cursor pagination + trend window
 }
 
 model AuditLog {

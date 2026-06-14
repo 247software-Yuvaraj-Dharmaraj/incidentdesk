@@ -249,7 +249,7 @@ export function IncidentsListPage() {
 		}
 	}
 
-	const assigneeOptions = [{ label: t('detail.unassigned'), value: 'unassigned' }, ...(users?.map((u) => ({ label: u.fullName, value: u.id })) ?? [])];
+	const assigneeOptions = useMemo(() => [{ label: t('detail.unassigned'), value: 'unassigned' }, ...(users?.map((u) => ({ label: u.fullName, value: u.id })) ?? [])], [users, t]);
 
 	// Active-filter chips (removable). Each entry resets its own filter on click.
 	const chips: { key: string; label: string; clear: () => void }[] = [

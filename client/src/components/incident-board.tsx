@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { DndContext, KeyboardSensor, PointerSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
@@ -17,6 +17,13 @@ const COLUMN_ACCENT: Record<Status, string> = {
 export function IncidentBoard({ incidents, canDrag }: { incidents: Incident[]; canDrag: boolean }) {
 	const update = useUpdateIncident();
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), useSensor(KeyboardSensor));
+
+	// Group once per data change instead of filtering all rows per column on every render/drag.
+	const byStatus = useMemo(() => {
+		const groups = Object.fromEntries(STATUSES.map((s) => [s, [] as Incident[]])) as Record<Status, Incident[]>;
+		for (const incident of incidents) groups[incident.status]?.push(incident);
+		return groups;
+	}, [incidents]);
 
 	// Size the board to fill the remaining viewport (multi-column layouts only) so
 	// the columns end at the bottom edge and the page itself never scrolls.
@@ -53,7 +60,7 @@ export function IncidentBoard({ incidents, canDrag }: { incidents: Incident[]; c
 		<DndContext sensors={sensors} onDragEnd={onDragEnd}>
 			<div ref={boardRef} style={boardHeight ? { height: boardHeight } : undefined} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 				{STATUSES.map((status) => (
-					<Column key={status} status={status} incidents={incidents.filter((i) => i.status === status)} canDrag={canDrag} />
+					<Column key={status} status={status} incidents={byStatus[status]} canDrag={canDrag} />
 				))}
 			</div>
 		</DndContext>
