@@ -7,6 +7,7 @@ import { useBulkDelete, useBulkUpdate, useDeleteIncident, useIncidents } from '@
 import { useDebounce } from '@/hooks/use-debounce';
 import { useUsers } from '@/hooks/use-users';
 import { useAuth } from '@/context/auth-context';
+import { useDensity } from '@/context/density-context';
 import { exportIncidentsCsv } from '@/lib/export-csv';
 import { StatusBadge, PriorityBadge, OverdueBadge } from '@/components/badges';
 import { IncidentBoard } from '@/components/incident-board';
@@ -340,12 +341,19 @@ export function IncidentsListPage() {
 /** Stacked card list shown on phones/tablets (below lg), where the wide table can't fit. */
 function IncidentCardList({ incidents, isAdmin, onEdit, onDelete }: { incidents: Incident[]; isAdmin: boolean; onEdit: (id: string) => void; onDelete: (id: string) => void }) {
 	const { t, i18n } = useTranslation();
+	const { density } = useDensity();
+	const compact = density === 'compact';
+	// Compact tightens padding, inter-card gap, and section spacing — mirrors the table's density behaviour.
+	const listGap = compact ? 'gap-1.5' : 'gap-2';
+	const cardPad = compact ? 'p-3' : 'p-4';
+	const sectionMt = compact ? 'mt-2' : 'mt-3';
+
 	return (
-		<ul className="flex flex-col gap-2 lg:hidden">
+		<ul className={`flex flex-col ${listGap} lg:hidden`}>
 			{incidents.map((incident) => (
-				<li key={incident.id} className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+				<li key={incident.id} className={`rounded-xl border border-slate-200 bg-white ${cardPad} dark:border-slate-800 dark:bg-slate-900`}>
 					<div className="flex items-start justify-between gap-2">
-						<Link to={`/incidents/${incident.id}`} title={incident.title} className="font-medium text-slate-900 hover:underline dark:text-slate-100">
+						<Link to={`/incidents/${incident.id}`} title={incident.title} className={`font-medium text-slate-900 hover:underline dark:text-slate-100 ${compact ? 'text-sm' : ''}`}>
 							{incident.title}
 						</Link>
 						{isAdmin && (
@@ -358,12 +366,12 @@ function IncidentCardList({ incidents, isAdmin, onEdit, onDelete }: { incidents:
 							/>
 						)}
 					</div>
-					<div className="mt-3 flex flex-wrap items-center gap-2">
+					<div className={`${sectionMt} flex flex-wrap items-center gap-2`}>
 						<StatusBadge status={incident.status} />
 						<PriorityBadge priority={incident.priority} />
 						{isOverdue(incident) && <OverdueBadge label={t('incidents.overdue')} />}
 					</div>
-					<div className="mt-3 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+					<div className={`${sectionMt} flex items-center justify-between text-xs text-slate-500 dark:text-slate-400`}>
 						<span>{incident.type}</span>
 						<span>{new Date(incident.createdAt).toLocaleDateString(i18n.resolvedLanguage)}</span>
 					</div>
