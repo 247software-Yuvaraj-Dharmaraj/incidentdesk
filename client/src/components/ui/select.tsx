@@ -18,13 +18,16 @@ interface SelectProps {
 	name?: string;
 	className?: string;
 	'aria-label'?: string;
+	/** Show the placeholder only in the trigger (as a label), not as a selectable list option.
+	 *  Use for action menus (e.g. bulk "Set status…") where the placeholder isn't a real choice. */
+	hidePlaceholderOption?: boolean;
 }
 
 const triggerClasses =
 	'flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus-visible:border-slate-400 focus-visible:ring-2 focus-visible:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus-visible:border-slate-500 dark:focus-visible:ring-slate-700';
 
 /** Accessible custom select (listbox). Replaces the native control so options get hover/pointer styling. Renders the list in a portal so it is never clipped. */
-export function Select({ value, onChange, options, label, placeholder, disabled, id, name, className = '', 'aria-label': ariaLabel }: SelectProps) {
+export function Select({ value, onChange, options, label, placeholder, disabled, id, name, className = '', 'aria-label': ariaLabel, hidePlaceholderOption = false }: SelectProps) {
 	const reactId = useId();
 	const selectId = id ?? name ?? reactId;
 	const [open, setOpen] = useState(false);
@@ -33,7 +36,7 @@ export function Select({ value, onChange, options, label, placeholder, disabled,
 	const triggerRef = useRef<HTMLButtonElement>(null);
 	const listRef = useRef<HTMLUListElement>(null);
 
-	const allOptions = placeholder !== undefined ? [{ label: placeholder, value: '' }, ...options] : options;
+	const allOptions = placeholder !== undefined && !hidePlaceholderOption ? [{ label: placeholder, value: '' }, ...options] : options;
 	const selected = allOptions.find((o) => o.value === value);
 	const showPlaceholderStyle = placeholder !== undefined && value === '';
 

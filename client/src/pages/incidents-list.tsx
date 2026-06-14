@@ -389,8 +389,8 @@ export function IncidentsListPage() {
 					<p className="mb-2 text-xs text-slate-500 dark:text-slate-400">{t('incidents.showing', { shown: incidents.length, total })}</p>
 					{isAdmin && view === 'table' && (
 						<SelectionBar count={selectedIds.length} onClear={clearSelection}>
-							<Select aria-label={t('incidents.bulkStatus')} value="" placeholder={t('incidents.bulkStatus')} options={toOptions(STATUSES)} disabled={bulkUpdate.isPending} onChange={(v) => v && applyBulk({ status: v as Status })} className="min-w-36" />
-							<Select aria-label={t('incidents.bulkAssign')} value="" placeholder={t('incidents.bulkAssign')} options={assigneeOptions} disabled={bulkUpdate.isPending} onChange={(v) => v && applyBulk({ assigneeId: v === 'unassigned' ? null : v })} className="min-w-36" />
+							<Select aria-label={t('incidents.bulkStatus')} value="" placeholder={t('incidents.bulkStatus')} hidePlaceholderOption options={toOptions(STATUSES)} disabled={bulkUpdate.isPending} onChange={(v) => v && applyBulk({ status: v as Status })} className="min-w-36" />
+							<Select aria-label={t('incidents.bulkAssign')} value="" placeholder={t('incidents.bulkAssign')} hidePlaceholderOption options={assigneeOptions} disabled={bulkUpdate.isPending} onChange={(v) => v && applyBulk({ assigneeId: v === 'unassigned' ? null : v })} className="min-w-36" />
 							<Button variant="danger" size="sm" onClick={() => setConfirmBulkDelete(true)} loading={bulkDelete.isPending}>
 								<Trash2 className="h-4 w-4" />
 								{t('common.delete')}
