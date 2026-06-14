@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import { type User } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { ApiError } from '../lib/api-error.js';
-import { type LoginInput, type SignupInput } from '../schemas/auth.schema.js';
+import { type LoginInput, type PreferencesInput, type SignupInput } from '../schemas/auth.schema.js';
 
 export type SafeUser = Omit<User, 'passwordHash'>;
 
@@ -44,4 +44,15 @@ export async function authenticateUser(input: LoginInput): Promise<SafeUser> {
 export async function getUserById(id: string): Promise<SafeUser | null> {
 	const user = await prisma.user.findUnique({ where: { id } });
 	return user ? toSafeUser(user) : null;
+}
+
+export async function updateUserPreferences(id: string, prefs: PreferencesInput): Promise<SafeUser> {
+	const user = await prisma.user.update({
+		where: { id },
+		data: {
+			...(prefs.theme !== undefined && { theme: prefs.theme }),
+			...(prefs.density !== undefined && { density: prefs.density }),
+		},
+	});
+	return toSafeUser(user);
 }

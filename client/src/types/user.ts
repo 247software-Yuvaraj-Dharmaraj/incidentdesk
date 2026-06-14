@@ -5,5 +5,7 @@ export interface User {
 	email: string;
 	fullName: string;
 	role: Role;
+	theme: 'light' | 'dark';
+	density: 'comfortable' | 'compact';
 	createdAt: string;
 }

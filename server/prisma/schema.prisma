@@ -38,6 +38,8 @@ model User {
   passwordHash String
   fullName     String
   role         Role       @default(REPORTER)
+  theme        String     @default("light")
+  density      String     @default("comfortable")
   reported     Incident[] @relation("reporter")
   assigned     Incident[] @relation("assignee")
   auditLogs    AuditLog[] @relation("actor")

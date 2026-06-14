@@ -5,6 +5,7 @@ type Density = 'comfortable' | 'compact';
 interface DensityContextValue {
 	density: Density;
 	toggleDensity: () => void;
+	setDensity: (density: Density) => void;
 }
 
 const DensityContext = createContext<DensityContextValue | undefined>(undefined);
@@ -31,7 +32,7 @@ export function DensityProvider({ children }: { children: ReactNode }) {
 		setDensity((prev) => (prev === 'compact' ? 'comfortable' : 'compact'));
 	}, []);
 
-	return <DensityContext.Provider value={{ density, toggleDensity }}>{children}</DensityContext.Provider>;
+	return <DensityContext.Provider value={{ density, toggleDensity, setDensity }}>{children}</DensityContext.Provider>;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

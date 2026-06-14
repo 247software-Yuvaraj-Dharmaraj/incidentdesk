@@ -2,8 +2,8 @@ import { asyncHandler } from '../lib/async-handler.js';
 import { authCookieOptions } from '../lib/cookie.js';
 import { AUTH_COOKIE, signToken } from '../lib/jwt.js';
 import { ApiError } from '../lib/api-error.js';
-import { authenticateUser, getUserById, registerUser } from '../services/auth.service.js';
-import { type LoginInput, type SignupInput } from '../schemas/auth.schema.js';
+import { authenticateUser, getUserById, registerUser, updateUserPreferences } from '../services/auth.service.js';
+import { type LoginInput, type PreferencesInput, type SignupInput } from '../schemas/auth.schema.js';
 
 export const signup = asyncHandler(async (req, res) => {
 	const user = await registerUser(req.body as SignupInput);
@@ -29,5 +29,10 @@ export const me = asyncHandler(async (req, res) => {
 	if (!user) {
 		throw ApiError.unauthorized('Session user no longer exists');
 	}
+	res.json({ user });
+});
+
+export const updatePreferences = asyncHandler(async (req, res) => {
+	const user = await updateUserPreferences(req.user!.id, req.body as PreferencesInput);
 	res.json({ user });
 });

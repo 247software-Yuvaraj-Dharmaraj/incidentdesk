@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 import { useRealtime } from '@/hooks/use-realtime';
+import { usePreferenceSync } from '@/hooks/use-preference-sync';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { DensityToggle } from '@/components/density-toggle';
@@ -15,6 +16,7 @@ export function AppLayout() {
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const { connected } = useRealtime();
+	usePreferenceSync(); // theme/density follow the logged-in account
 	const [menuOpen, setMenuOpen] = useState(false);
 
 	async function handleLogout() {
