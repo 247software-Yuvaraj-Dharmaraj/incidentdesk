@@ -34,11 +34,12 @@ export function DataGrid<T>({ columns, data, minWidth = '640px', getRowId, rowSe
 		getSortedRowModel: getSortedRowModel(),
 	});
 
-	const cellPad = density === 'compact' ? 'px-3 py-1.5' : 'px-4 py-3';
+	const compact = density === 'compact';
+	const cellPad = compact ? 'px-3 py-1.5' : 'px-4 py-3';
 
 	return (
 		<div className="overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-			<table className="w-full text-left text-sm" style={{ minWidth }}>
+			<table className={`w-full text-left ${compact ? 'text-xs' : 'text-sm'}`} style={{ minWidth }}>
 				<thead className="border-b border-slate-200 bg-slate-50 text-xs tracking-wide text-slate-500 uppercase dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
 					{table.getHeaderGroups().map((headerGroup) => (
 						<tr key={headerGroup.id}>

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/auth-context';
+import { useDensity } from '@/context/density-context';
 import { useIncidentMetrics, useIncidentStats } from '@/hooks/use-incidents';
 import { Card } from '@/components/ui/card';
 import { TrendChart } from '@/components/trend-chart';
@@ -22,6 +23,11 @@ function formatMttr(hours: number | null): string | null {
 export function DashboardPage() {
 	const { user } = useAuth();
 	const { t } = useTranslation();
+	const { density } = useDensity();
+	const compact = density === 'compact';
+	const cardPad = compact ? 'p-4' : 'p-5';
+	const gridGap = compact ? 'gap-3' : 'gap-4';
+	const valueText = compact ? 'text-2xl' : 'text-3xl';
 	const { data: stats, isLoading } = useIncidentStats();
 	const { data: metrics } = useIncidentMetrics();
 
@@ -35,7 +41,7 @@ export function DashboardPage() {
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{t('dashboard.title')}</h1>
+			<h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{t('dashboard.title')}</h1>
 			<p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
 				{t('dashboard.welcome', { name: user?.fullName })} · <span className="font-medium text-slate-700 dark:text-slate-300">{user?.role}</span>
 			</p>
@@ -50,21 +56,21 @@ export function DashboardPage() {
 				</Card>
 			) : (
 				<>
-					<div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+					<div className={`mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 ${gridGap}`}>
 						{CARDS.map((card) => (
-							<Card key={card.key} className="p-5">
+							<Card key={card.key} className={cardPad}>
 								<p className="text-xs tracking-wide text-slate-400 uppercase dark:text-slate-500">{t(card.labelKey)}</p>
-								{isLoading ? <div className="mt-2 h-8 w-12 animate-pulse rounded bg-slate-100 dark:bg-slate-800" /> : <p className={`mt-1 text-3xl font-bold ${card.accent}`}>{valueFor(card.key)}</p>}
+								{isLoading ? <div className="mt-2 h-8 w-12 animate-pulse rounded bg-slate-100 dark:bg-slate-800" /> : <p className={`mt-1 font-bold tracking-tight tabular-nums ${valueText} ${card.accent}`}>{valueFor(card.key)}</p>}
 							</Card>
 						))}
-						<Card className="p-5">
+						<Card className={cardPad}>
 							<p className="text-xs tracking-wide text-slate-400 uppercase dark:text-slate-500">{t('dashboard.mttr')}</p>
-							<p className="text-brand mt-1 text-3xl font-bold">{mttr ?? '—'}</p>
+							<p className={`text-brand mt-1 font-bold tracking-tight tabular-nums ${valueText}`}>{mttr ?? '—'}</p>
 						</Card>
 					</div>
 
 					{metrics && metrics.trend.length > 0 && (
-						<Card className="mt-6 p-6">
+						<Card className={`mt-6 ${compact ? 'p-4' : 'p-6'}`}>
 							<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-slate-100">{t('dashboard.trend')}</h2>
 							<TrendChart data={metrics.trend} createdLabel={t('dashboard.created')} resolvedLabel={t('dashboard.resolved')} />
 						</Card>

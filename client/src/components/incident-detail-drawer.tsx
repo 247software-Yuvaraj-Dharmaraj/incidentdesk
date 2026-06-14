@@ -4,6 +4,7 @@ import { Trash2 } from 'lucide-react';
 import { useDeleteIncident, useIncident, useUpdateIncident } from '@/hooks/use-incidents';
 import { useUsers } from '@/hooks/use-users';
 import { useAuth } from '@/context/auth-context';
+import { useDensity } from '@/context/density-context';
 import { selectableStatuses } from '@/lib/incident-status';
 import { StatusBadge, PriorityBadge, OverdueBadge } from '@/components/badges';
 import { ConfirmDialog } from '@/components/confirm-dialog';
@@ -23,6 +24,8 @@ type Tab = 'overview' | 'activity' | 'comments';
 export function IncidentDetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
 	const { user } = useAuth();
 	const { t, i18n } = useTranslation();
+	const { density } = useDensity();
+	const compact = density === 'compact';
 	const isAdmin = user?.role === 'ADMIN';
 	const [tab, setTab] = useState<Tab>('overview');
 	const [confirmOpen, setConfirmOpen] = useState(false);
@@ -83,8 +86,8 @@ export function IncidentDetailDrawer({ id, onClose }: { id: string; onClose: () 
 					</div>
 
 					{tab === 'overview' && (
-						<div className="flex flex-col gap-5">
-							<dl className="grid grid-cols-2 gap-4 text-sm">
+						<div className={`flex flex-col ${compact ? 'gap-3' : 'gap-5'}`}>
+							<dl className={`grid grid-cols-1 sm:grid-cols-2 ${compact ? 'gap-3 text-xs' : 'gap-4 text-sm'}`}>
 								<Field label={t('detail.type')} value={incident.type} />
 								<div>
 									<Dt>{t('detail.reportedBy')}</Dt>
@@ -99,7 +102,7 @@ export function IncidentDetailDrawer({ id, onClose }: { id: string; onClose: () 
 								<Field label={t('detail.created')} value={new Date(incident.createdAt).toLocaleString(i18n.resolvedLanguage)} />
 								<Field label={t('detail.dueDate')} value={incident.dueDate ? new Date(incident.dueDate).toLocaleDateString(i18n.resolvedLanguage) : '—'} />
 								<Field label={t('detail.resolvedAt')} value={incident.resolvedAt ? new Date(incident.resolvedAt).toLocaleString(i18n.resolvedLanguage) : '—'} />
-								<div className="col-span-2">
+								<div className="sm:col-span-2">
 									<Dt>{t('detail.description')}</Dt>
 									<dd className="mt-1 whitespace-pre-wrap text-slate-700 dark:text-slate-300">{incident.description || '—'}</dd>
 								</div>
@@ -108,7 +111,7 @@ export function IncidentDetailDrawer({ id, onClose }: { id: string; onClose: () 
 							{isAdmin && (
 								<div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
 									<h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{t('detail.adminControls')}</h3>
-									<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+									<div className={`grid grid-cols-1 sm:grid-cols-2 ${compact ? 'gap-3' : 'gap-4'}`}>
 										<Select label={t('detail.status')} value={incident.status} disabled={update.isPending} options={toOptions(selectableStatuses(incident.status))} onChange={(v) => patch({ status: v as Status })} />
 										<Select label={t('detail.priority')} value={incident.priority} disabled={update.isPending} options={toOptions(PRIORITIES)} onChange={(v) => patch({ priority: v as Priority })} />
 										<Select label={t('detail.assignee')} value={incident.assigneeId ?? ''} disabled={update.isPending} options={[{ label: t('detail.unassigned'), value: '' }, ...(users?.map((u) => ({ label: u.fullName, value: u.id })) ?? [])]} onChange={(v) => patch({ assigneeId: v || null })} />

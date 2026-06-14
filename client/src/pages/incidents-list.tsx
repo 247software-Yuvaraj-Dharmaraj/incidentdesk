@@ -7,6 +7,7 @@ import { useBulkDelete, useBulkUpdate, useDeleteIncident, useIncidents } from '@
 import { useDebounce } from '@/hooks/use-debounce';
 import { useUsers } from '@/hooks/use-users';
 import { useAuth } from '@/context/auth-context';
+import { useDensity } from '@/context/density-context';
 import { StatusBadge, PriorityBadge, OverdueBadge } from '@/components/badges';
 import { IncidentBoard } from '@/components/incident-board';
 import { ConfirmDialog } from '@/components/confirm-dialog';
@@ -285,7 +286,18 @@ export function IncidentsListPage() {
 							</Button>
 						</SelectionBar>
 					)}
-					{view === 'board' ? <IncidentBoard incidents={incidents} canDrag={isAdmin} /> : <DataGrid columns={columns} data={incidents} {...(isAdmin ? { getRowId: (r: Incident) => r.id, rowSelection, onRowSelectionChange: setRowSelection } : {})} />}
+					{view === 'board' ? (
+						<IncidentBoard incidents={incidents} canDrag={isAdmin} />
+					) : (
+						<>
+							{/* Phones/tablets: stacked cards (the wide table needs horizontal room it doesn't have here). */}
+							<IncidentCardList incidents={incidents} isAdmin={isAdmin} onEdit={(id) => navigate(`/incidents/${id}`)} onDelete={setConfirmDeleteId} />
+							{/* Desktop: full sortable/selectable data grid. */}
+							<div className="hidden lg:block">
+								<DataGrid columns={columns} data={incidents} {...(isAdmin ? { getRowId: (r: Incident) => r.id, rowSelection, onRowSelectionChange: setRowSelection } : {})} />
+							</div>
+						</>
+					)}
 				</>
 			)}
 
@@ -322,6 +334,49 @@ export function IncidentsListPage() {
 			{isNew && <IncidentCreateDrawer onClose={() => navigate('/incidents')} onCreated={(id) => navigate(`/incidents/${id}`)} />}
 			{detailId && <IncidentDetailDrawer id={detailId} onClose={() => navigate('/incidents')} />}
 		</div>
+	);
+}
+
+/** Stacked card list shown on phones/tablets (below lg), where the wide table can't fit. */
+function IncidentCardList({ incidents, isAdmin, onEdit, onDelete }: { incidents: Incident[]; isAdmin: boolean; onEdit: (id: string) => void; onDelete: (id: string) => void }) {
+	const { t, i18n } = useTranslation();
+	const { density } = useDensity();
+	const compact = density === 'compact';
+	// Compact tightens padding, inter-card gap, and section spacing — mirrors the table's density behaviour.
+	const listGap = compact ? 'gap-1.5' : 'gap-2';
+	const cardPad = compact ? 'p-3' : 'p-4';
+	const sectionMt = compact ? 'mt-2' : 'mt-3';
+
+	return (
+		<ul className={`flex flex-col ${listGap} lg:hidden`}>
+			{incidents.map((incident) => (
+				<li key={incident.id} className={`rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md ${cardPad} dark:border-slate-800 dark:bg-slate-900`}>
+					<div className="flex items-start justify-between gap-2">
+						<Link to={`/incidents/${incident.id}`} title={incident.title} className={`font-medium text-slate-900 hover:underline dark:text-slate-100 ${compact ? 'text-sm' : ''}`}>
+							{incident.title}
+						</Link>
+						{isAdmin && (
+							<ActionMenu
+								label={t('incidents.col.actions')}
+								items={[
+									{ key: 'edit', label: t('common.edit'), icon: <Pencil className="h-4 w-4" />, onSelect: () => onEdit(incident.id) },
+									{ key: 'delete', label: t('common.delete'), icon: <Trash2 className="h-4 w-4" />, destructive: true, onSelect: () => onDelete(incident.id) },
+								]}
+							/>
+						)}
+					</div>
+					<div className={`${sectionMt} flex flex-wrap items-center gap-2`}>
+						<StatusBadge status={incident.status} />
+						<PriorityBadge priority={incident.priority} />
+						{isOverdue(incident) && <OverdueBadge label={t('incidents.overdue')} />}
+					</div>
+					<div className={`${sectionMt} flex items-center justify-between text-xs text-slate-500 dark:text-slate-400`}>
+						<span>{incident.type}</span>
+						<span>{new Date(incident.createdAt).toLocaleDateString(i18n.resolvedLanguage)}</span>
+					</div>
+				</li>
+			))}
+		</ul>
 	);
 }
 

@@ -7,6 +7,7 @@ import { AuthProvider } from '@/context/auth-context';
 import { ThemeProvider } from '@/context/theme-context';
 import { DensityProvider } from '@/context/density-context';
 import { ErrorBoundary } from '@/components/error-boundary';
+import '@fontsource-variable/inter/index.css';
 import '@/i18n';
 import './index.css';
 import App from './App.tsx';

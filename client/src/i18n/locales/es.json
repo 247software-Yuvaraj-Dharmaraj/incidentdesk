@@ -9,6 +9,9 @@
 		"live": "En vivo",
 		"compactView": "Cambiar a vista compacta",
 		"comfortableView": "Cambiar a vista cómoda",
+		"density": "Densidad de visualización",
+		"compact": "Compacta",
+		"comfortable": "Cómoda",
 		"cancel": "Cancelar",
 		"edit": "Editar",
 		"delete": "Eliminar",
@@ -18,7 +21,9 @@
 	"nav": {
 		"primary": "Principal",
 		"dashboard": "Panel",
-		"incidents": "Incidentes"
+		"incidents": "Incidentes",
+		"openMenu": "Abrir menú",
+		"closeMenu": "Cerrar menú"
 	},
 	"auth": {
 		"welcomeBack": "Bienvenido de nuevo",

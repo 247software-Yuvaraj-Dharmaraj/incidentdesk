@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { DndContext, KeyboardSensor, PointerSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { useUpdateIncident } from '@/hooks/use-incidents';
+import { useDensity } from '@/context/density-context';
 import { PriorityBadge, OverdueBadge } from '@/components/badges';
 import { STATUSES, isOverdue, type Incident, type Status } from '@/types/incident';
 
@@ -79,6 +80,8 @@ function Column({ status, incidents, canDrag }: { status: Status; incidents: Inc
 
 function Card({ incident, canDrag }: { incident: Incident; canDrag: boolean }) {
 	const { t } = useTranslation();
+	const { density } = useDensity();
+	const compact = density === 'compact';
 	const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: incident.id, disabled: !canDrag });
 	const style = transform ? { transform: `translate(${transform.x}px, ${transform.y}px)`, zIndex: 10 } : undefined;
 	return (
@@ -87,17 +90,17 @@ function Card({ incident, canDrag }: { incident: Incident; canDrag: boolean }) {
 			style={style}
 			{...listeners}
 			{...attributes}
-			className={`rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800 ${canDrag ? 'cursor-grab active:cursor-grabbing' : ''} ${isDragging ? 'opacity-50' : ''}`}
+			className={`rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 ${compact ? 'p-2' : 'p-3'} ${canDrag ? 'cursor-grab active:cursor-grabbing' : ''} ${isDragging ? 'opacity-50' : ''}`}
 		>
-			<Link to={`/incidents/${incident.id}`} title={incident.title} className="line-clamp-2 block text-sm font-medium text-slate-900 hover:underline dark:text-slate-100" onPointerDown={(e) => e.stopPropagation()}>
+			<Link to={`/incidents/${incident.id}`} title={incident.title} className={`line-clamp-2 block font-medium text-slate-900 hover:underline dark:text-slate-100 ${compact ? 'text-xs' : 'text-sm'}`} onPointerDown={(e) => e.stopPropagation()}>
 				{incident.title}
 			</Link>
 			{isOverdue(incident) && (
-				<div className="mt-2">
+				<div className={compact ? 'mt-1.5' : 'mt-2'}>
 					<OverdueBadge label={t('incidents.overdue')} />
 				</div>
 			)}
-			<div className="mt-2 flex items-center justify-between">
+			<div className={`${compact ? 'mt-1.5' : 'mt-2'} flex items-center justify-between`}>
 				<PriorityBadge priority={incident.priority} />
 				<span className="text-xs text-slate-400 dark:text-slate-500">{incident.type}</span>
 			</div>
