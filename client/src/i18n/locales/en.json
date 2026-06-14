@@ -155,7 +155,9 @@
 		"updateConflict": "This incident was changed elsewhere — refreshing.",
 		"commentFailed": "Couldn't post comment",
 		"bulkUpdated": "{{count}} incident(s) updated",
-		"bulkDeleted": "{{count}} incident(s) deleted"
+		"bulkUpdatedPartial": "{{updated}} updated, {{skipped}} skipped",
+		"bulkDeleted": "{{count}} incident(s) deleted",
+		"bulkDeletedPartial": "{{deleted}} deleted, {{skipped}} skipped"
 	},
 	"comments": {
 		"title": "Comments",

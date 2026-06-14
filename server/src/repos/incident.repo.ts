@@ -59,6 +59,11 @@ export function deleteIncidentById(id: string) {
 	return prisma.incident.delete({ where: { id } });
 }
 
+export async function findExistingIncidentIds(ids: string[]) {
+	const rows = await prisma.incident.findMany({ where: { id: { in: ids } }, select: { id: true } });
+	return rows.map((r) => r.id);
+}
+
 export function deleteIncidentsByIds(ids: string[]) {
 	return prisma.incident.deleteMany({ where: { id: { in: ids } } });
 }

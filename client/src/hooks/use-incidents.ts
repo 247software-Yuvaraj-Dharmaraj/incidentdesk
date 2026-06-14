@@ -132,13 +132,22 @@ export function useUpdateIncident() {
 	});
 }
 
+/** Distinct failure reasons, joined — shown as the toast description when a bulk op partially fails. */
+function summarizeFailures(failed: incidentsApi.BulkFailure[]): string {
+	return [...new Set(failed.map((f) => f.reason))].join(' · ');
+}
+
 export function useBulkUpdate() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: incidentsApi.bulkUpdate,
 		onSuccess: (res) => {
 			queryClient.invalidateQueries({ queryKey: incidentKeys.all });
-			toast.success(i18n.t('toast.bulkUpdated', { count: res.updated }));
+			if (res.skipped > 0) {
+				toast.warning(i18n.t('toast.bulkUpdatedPartial', { updated: res.updated, skipped: res.skipped }), { description: summarizeFailures(res.failed) });
+			} else {
+				toast.success(i18n.t('toast.bulkUpdated', { count: res.updated }));
+			}
 		},
 		onError: () => toast.error(i18n.t('toast.updateFailed')),
 	});
@@ -150,7 +159,11 @@ export function useBulkDelete() {
 		mutationFn: incidentsApi.bulkDelete,
 		onSuccess: (res) => {
 			queryClient.invalidateQueries({ queryKey: incidentKeys.all });
-			toast.success(i18n.t('toast.bulkDeleted', { count: res.deleted }));
+			if (res.failed.length > 0) {
+				toast.warning(i18n.t('toast.bulkDeletedPartial', { deleted: res.deleted, skipped: res.failed.length }), { description: summarizeFailures(res.failed) });
+			} else {
+				toast.success(i18n.t('toast.bulkDeleted', { count: res.deleted }));
+			}
 		},
 		onError: () => toast.error(i18n.t('toast.deleteFailed')),
 	});

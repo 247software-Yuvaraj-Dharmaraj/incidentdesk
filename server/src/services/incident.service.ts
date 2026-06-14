@@ -3,7 +3,7 @@ import { ApiError } from '../lib/api-error.js';
 import { canTransition } from '../lib/incident-status.js';
 import { type AuthUser } from '../types/auth.js';
 import { type BulkDeleteInput, type BulkUpdateInput, type CreateIncidentInput, type ListIncidentsQuery, type UpdateIncidentInput } from '../schemas/incident.schema.js';
-import { type AuditEntry, countIncidentsByStatus, createIncident, deleteIncidentById, deleteIncidentsByIds, findIncidentById, findResolvedTimings, findTimingsSince, listIncidents, updateIncident } from '../repos/incident.repo.js';
+import { type AuditEntry, countIncidentsByStatus, createIncident, deleteIncidentById, deleteIncidentsByIds, findExistingIncidentIds, findIncidentById, findResolvedTimings, findTimingsSince, listIncidents, updateIncident } from '../repos/incident.repo.js';
 import { createComment, listComments } from '../repos/comment.repo.js';
 import { findUserExists } from '../repos/user.repo.js';
 import { emitIncidentsChanged } from '../lib/realtime.js';
@@ -195,23 +195,26 @@ export async function bulkUpdateByAdmin(input: BulkUpdateInput, actor: AuthUser)
 	}
 
 	let updated = 0;
-	let skipped = 0;
+	// Per-item feedback: record which incidents were skipped and why (e.g. a disallowed
+	// status transition or a concurrency conflict on that particular incident).
+	const failed: { id: string; reason: string }[] = [];
 	for (const id of ids) {
 		try {
 			await updateIncidentByAdmin(id, patch, actor);
 			updated += 1;
-		} catch {
-			// e.g. a disallowed status transition for this particular incident — skip it.
-			skipped += 1;
+		} catch (err) {
+			failed.push({ id, reason: err instanceof Error ? err.message : 'Update failed' });
 		}
 	}
 	emitIncidentsChanged();
-	return { updated, skipped };
+	return { updated, skipped: failed.length, failed };
 }
 
-/** Admin-only. Permanently deletes many incidents. */
+/** Admin-only. Permanently deletes many incidents, reporting any ids that no longer existed. */
 export async function bulkDeleteByAdmin(input: BulkDeleteInput) {
+	const existing = new Set(await findExistingIncidentIds(input.ids));
 	const { count } = await deleteIncidentsByIds(input.ids);
 	emitIncidentsChanged();
-	return { deleted: count };
+	const failed = input.ids.filter((id) => !existing.has(id)).map((id) => ({ id, reason: 'Not found' }));
+	return { deleted: count, failed };
 }

@@ -15,7 +15,6 @@ import { PageHeader } from '@/components/ui/page-header';
 import { DataGrid } from '@/components/ui/data-grid';
 import { Select } from '@/components/ui/select';
 import { Button, buttonClasses } from '@/components/ui/button';
-import { ActionMenu } from '@/components/ui/action-menu';
 import { SelectionBar } from '@/components/ui/selection-bar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { IncidentDetailDrawer } from '@/components/incident-detail-drawer';
@@ -30,6 +29,32 @@ const toOptions = (values: string[]) => values.map((v) => ({ label: v.replace('_
 
 type View = 'table' | 'board';
 type SortKey = 'newest' | 'oldest' | 'priority' | 'status';
+
+/** Inline, always-visible row actions (edit + delete) — more discoverable than a kebab menu. */
+function RowActions({ onEdit, onDelete, editLabel, deleteLabel }: { onEdit: () => void; onDelete: () => void; editLabel: string; deleteLabel: string }) {
+	return (
+		<div className="flex items-center justify-end gap-1">
+			<button
+				type="button"
+				onClick={onEdit}
+				aria-label={editLabel}
+				title={editLabel}
+				className="rounded-md p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+			>
+				<Pencil className="h-4 w-4" />
+			</button>
+			<button
+				type="button"
+				onClick={onDelete}
+				aria-label={deleteLabel}
+				title={deleteLabel}
+				className="rounded-md p-1.5 text-slate-500 transition hover:bg-red-50 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none dark:text-slate-400 dark:hover:bg-red-950 dark:hover:text-red-400"
+			>
+				<Trash2 className="h-4 w-4" />
+			</button>
+		</div>
+	);
+}
 
 /** Client-side sort for the mobile/tablet card list (the table sorts via its own headers). */
 function sortIncidents(list: Incident[], sort: SortKey): Incident[] {
@@ -155,17 +180,7 @@ export function IncidentsListPage() {
 						columnHelper.display({
 							id: 'actions',
 							header: () => <span className="sr-only">{t('incidents.col.actions')}</span>,
-							cell: (info) => (
-								<div className="flex justify-end">
-									<ActionMenu
-										label={t('incidents.col.actions')}
-										items={[
-											{ key: 'edit', label: t('common.edit'), icon: <Pencil className="h-4 w-4" />, onSelect: () => navigate(withSearch(`/incidents/${info.row.original.id}`)) },
-											{ key: 'delete', label: t('common.delete'), icon: <Trash2 className="h-4 w-4" />, destructive: true, onSelect: () => setConfirmDeleteId(info.row.original.id) },
-										]}
-									/>
-								</div>
-							),
+							cell: (info) => <RowActions editLabel={t('common.edit')} deleteLabel={t('common.delete')} onEdit={() => navigate(withSearch(`/incidents/${info.row.original.id}`))} onDelete={() => setConfirmDeleteId(info.row.original.id)} />,
 						}),
 					]
 				: []),
@@ -499,15 +514,7 @@ function IncidentCardList({ incidents, isAdmin, sort, onSortChange, rowSelection
 										{incident.title}
 									</Link>
 								</div>
-								{isAdmin && (
-									<ActionMenu
-										label={t('incidents.col.actions')}
-										items={[
-											{ key: 'edit', label: t('common.edit'), icon: <Pencil className="h-4 w-4" />, onSelect: () => onEdit(incident.id) },
-											{ key: 'delete', label: t('common.delete'), icon: <Trash2 className="h-4 w-4" />, destructive: true, onSelect: () => onDelete(incident.id) },
-										]}
-									/>
-								)}
+								{isAdmin && <RowActions editLabel={t('common.edit')} deleteLabel={t('common.delete')} onEdit={() => onEdit(incident.id)} onDelete={() => onDelete(incident.id)} />}
 							</div>
 							<div className={`${sectionMt} flex flex-wrap items-center gap-2`}>
 								<StatusBadge status={incident.status} />

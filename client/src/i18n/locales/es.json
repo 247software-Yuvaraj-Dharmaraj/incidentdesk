@@ -155,7 +155,9 @@
 		"updateConflict": "Esta incidencia fue modificada en otro lugar: actualizando.",
 		"commentFailed": "No se pudo publicar el comentario",
 		"bulkUpdated": "{{count}} incidencia(s) actualizada(s)",
-		"bulkDeleted": "{{count}} incidencia(s) eliminada(s)"
+		"bulkUpdatedPartial": "{{updated}} actualizada(s), {{skipped}} omitida(s)",
+		"bulkDeleted": "{{count}} incidencia(s) eliminada(s)",
+		"bulkDeletedPartial": "{{deleted}} eliminada(s), {{skipped}} omitida(s)"
 	},
 	"comments": {
 		"title": "Comentarios",

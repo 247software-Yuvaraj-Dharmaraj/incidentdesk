@@ -78,13 +78,18 @@ export interface BulkUpdatePayload {
 	assigneeId?: string | null;
 }
 
-export async function bulkUpdate(payload: BulkUpdatePayload): Promise<{ updated: number; skipped: number }> {
-	const { data } = await http.post<{ updated: number; skipped: number }>('/incidents/bulk-update', payload);
+export interface BulkFailure {
+	id: string;
+	reason: string;
+}
+
+export async function bulkUpdate(payload: BulkUpdatePayload): Promise<{ updated: number; skipped: number; failed: BulkFailure[] }> {
+	const { data } = await http.post<{ updated: number; skipped: number; failed: BulkFailure[] }>('/incidents/bulk-update', payload);
 	return data;
 }
 
-export async function bulkDelete(ids: string[]): Promise<{ deleted: number }> {
-	const { data } = await http.post<{ deleted: number }>('/incidents/bulk-delete', { ids });
+export async function bulkDelete(ids: string[]): Promise<{ deleted: number; failed: BulkFailure[] }> {
+	const { data } = await http.post<{ deleted: number; failed: BulkFailure[] }>('/incidents/bulk-delete', { ids });
 	return data;
 }
 
