@@ -19,8 +19,14 @@ export function LoginPage() {
 	const {
 		register,
 		handleSubmit,
+		setValue,
 		formState: { errors, isSubmitting },
 	} = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
+
+	function fillDemo(email: string, password: string) {
+		setValue('email', email, { shouldValidate: true });
+		setValue('password', password, { shouldValidate: true });
+	}
 
 	async function onSubmit(values: LoginValues) {
 		setFormError(null);
@@ -59,6 +65,28 @@ export function LoginPage() {
 						{t('auth.signUp')}
 					</Link>
 				</p>
+
+				<div className="mt-6 border-t border-slate-200 pt-4 dark:border-slate-800">
+					<p className="text-center text-xs text-slate-400 dark:text-slate-500">{t('auth.demoHint')}</p>
+					<div className="mt-2 flex items-center justify-center gap-2">
+						<button
+							type="button"
+							onClick={() => fillDemo('admin@incidentdesk.dev', 'Admin123!')}
+							title="admin@incidentdesk.dev / Admin123!"
+							className="hover:border-brand/40 hover:text-brand rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition dark:border-slate-700 dark:text-slate-300"
+						>
+							{t('auth.demoAdmin')}
+						</button>
+						<button
+							type="button"
+							onClick={() => fillDemo('reporter@incidentdesk.dev', 'Reporter123!')}
+							title="reporter@incidentdesk.dev / Reporter123!"
+							className="hover:border-brand/40 hover:text-brand rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition dark:border-slate-700 dark:text-slate-300"
+						>
+							{t('auth.demoReporter')}
+						</button>
+					</div>
+				</div>
 			</Card>
 		</div>
 	);

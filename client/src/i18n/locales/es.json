@@ -28,6 +28,9 @@
 	"auth": {
 		"welcomeBack": "Bienvenido de nuevo",
 		"signInSubtitle": "Inicia sesión en IncidentDesk",
+		"demoHint": "Cuentas de demostración — clic para rellenar",
+		"demoAdmin": "Administrador",
+		"demoReporter": "Reportero",
 		"createAccount": "Crear cuenta",
 		"signUpSubtitle": "Empieza con IncidentDesk",
 		"fullName": "Nombre completo",

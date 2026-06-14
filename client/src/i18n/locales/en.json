@@ -28,6 +28,9 @@
 	"auth": {
 		"welcomeBack": "Welcome back",
 		"signInSubtitle": "Sign in to IncidentDesk",
+		"demoHint": "Demo accounts — click to fill",
+		"demoAdmin": "Admin",
+		"demoReporter": "Reporter",
 		"createAccount": "Create account",
 		"signUpSubtitle": "Get started with IncidentDesk",
 		"fullName": "Full name",
