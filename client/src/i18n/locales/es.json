@@ -18,7 +18,9 @@
 	"nav": {
 		"primary": "Principal",
 		"dashboard": "Panel",
-		"incidents": "Incidentes"
+		"incidents": "Incidentes",
+		"openMenu": "Abrir menú",
+		"closeMenu": "Cerrar menú"
 	},
 	"auth": {
 		"welcomeBack": "Bienvenido de nuevo",

@@ -84,7 +84,7 @@ export function IncidentDetailDrawer({ id, onClose }: { id: string; onClose: () 
 
 					{tab === 'overview' && (
 						<div className="flex flex-col gap-5">
-							<dl className="grid grid-cols-2 gap-4 text-sm">
+							<dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
 								<Field label={t('detail.type')} value={incident.type} />
 								<div>
 									<Dt>{t('detail.reportedBy')}</Dt>
@@ -99,7 +99,7 @@ export function IncidentDetailDrawer({ id, onClose }: { id: string; onClose: () 
 								<Field label={t('detail.created')} value={new Date(incident.createdAt).toLocaleString(i18n.resolvedLanguage)} />
 								<Field label={t('detail.dueDate')} value={incident.dueDate ? new Date(incident.dueDate).toLocaleDateString(i18n.resolvedLanguage) : '—'} />
 								<Field label={t('detail.resolvedAt')} value={incident.resolvedAt ? new Date(incident.resolvedAt).toLocaleString(i18n.resolvedLanguage) : '—'} />
-								<div className="col-span-2">
+								<div className="sm:col-span-2">
 									<Dt>{t('detail.description')}</Dt>
 									<dd className="mt-1 whitespace-pre-wrap text-slate-700 dark:text-slate-300">{incident.description || '—'}</dd>
 								</div>
