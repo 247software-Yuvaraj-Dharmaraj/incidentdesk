@@ -1,11 +1,25 @@
 # IncidentDesk
 
+![CI](https://github.com/247software-Yuvaraj-Dharmaraj/incidentdesk/actions/workflows/ci.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+
 A full-stack incident & request management tracker with role-based access control, built as a production-style demonstration of a modern React + Node + PostgreSQL stack.
 
 > **Live demo:** https://incidentdesk.vercel.app
 > **Demo logins:** `admin@incidentdesk.dev / Admin123!` · `reporter@incidentdesk.dev / Reporter123!`
 >
 > _The API is hosted on a free tier that sleeps when idle — the first request after a pause may take ~30–60s to wake._
+
+## Screenshots
+
+| Dashboard | Incidents |
+|---|---|
+| ![Dashboard](screenshots/dashboard.png) | ![Incidents](screenshots/incidents.png) |
 
 ## Features
 
