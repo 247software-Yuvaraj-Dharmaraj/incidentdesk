@@ -52,7 +52,10 @@ export function IncidentBoard({ incidents, canDrag }: { incidents: Incident[]; c
 		const newStatus = over.id as Status;
 		const incident = incidents.find((i) => i.id === active.id);
 		if (incident && incident.status !== newStatus) {
-			update.mutate({ id: incident.id, payload: { status: newStatus } });
+			// Send expectedUpdatedAt so a drag on a stale card is rejected (409) and
+			// rolled back — same optimistic-concurrency guard the detail drawer uses,
+			// instead of silently overwriting a concurrent change.
+			update.mutate({ id: incident.id, payload: { status: newStatus, expectedUpdatedAt: incident.updatedAt } });
 		}
 	}
 
