@@ -17,6 +17,8 @@ import { Select } from '@/components/ui/select';
 import { Button, buttonClasses } from '@/components/ui/button';
 import { SelectionBar } from '@/components/ui/selection-bar';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Pagination } from '@/components/ui/pagination';
+import { listIncidents as listIncidentsApi } from '@/api/incidents.api';
 import { IncidentDetailDrawer } from '@/components/incident-detail-drawer';
 import { IncidentCreateDrawer } from '@/components/incident-create-drawer';
 import { INCIDENT_TYPES, PRIORITIES, STATUSES, isOverdue, type Incident, type IncidentFilters, type IncidentType, type Priority, type Status } from '@/types/incident';
@@ -29,6 +31,9 @@ const toOptions = (values: string[]) => values.map((v) => ({ label: v.replace('_
 
 type View = 'table' | 'board';
 type SortKey = 'newest' | 'oldest' | 'priority' | 'status';
+
+const TABLE_PAGE_SIZE = 12; // rows per page in the table/card list
+const BOARD_PAGE_SIZE = 100; // board shows all matching incidents (up to this cap)
 
 /** Inline, always-visible row actions (edit + delete) — more discoverable than a kebab menu. */
 function RowActions({ onEdit, onDelete, editLabel, deleteLabel }: { onEdit: () => void; onDelete: () => void; editLabel: string; deleteLabel: string }) {
@@ -120,17 +125,36 @@ export function IncidentsListPage() {
 		},
 		[setSearchParams]
 	);
-	const setStatus = (v: string) => setParam('status', v);
-	const setType = (v: string) => setParam('type', v);
-	const setPriority = (v: string) => setParam('priority', v);
-	const setAssigneeId = (v: string) => setParam('assignee', v);
-	const setOverdue = (v: boolean) => setParam('overdue', v ? 'true' : '');
+	// Changing a filter resets to page 1 — the previous page may not exist for the new result set.
+	const setFilter = useCallback(
+		(key: string, value: string) => {
+			setSearchParams(
+				(prev) => {
+					const next = new URLSearchParams(prev);
+					if (value) next.set(key, value);
+					else next.delete(key);
+					next.delete('page');
+					return next;
+				},
+				{ replace: true }
+			);
+		},
+		[setSearchParams]
+	);
+	const setStatus = (v: string) => setFilter('status', v);
+	const setType = (v: string) => setFilter('type', v);
+	const setPriority = (v: string) => setFilter('priority', v);
+	const setAssigneeId = (v: string) => setFilter('assignee', v);
+	const setOverdue = (v: boolean) => setFilter('overdue', v ? 'true' : '');
+	const setPage = (p: number) => setParam('page', p > 1 ? String(p) : '');
 	// Build a path that carries the current filters, so opening/closing a drawer keeps them.
 	const withSearch = useCallback((pathname: string) => ({ pathname, search: listSearch }), [listSearch]);
 
+	// Mirror the debounced search term into the URL (resets to page 1 when it changes).
 	useEffect(() => {
-		setParam('q', debouncedSearch);
-	}, [debouncedSearch, setParam]);
+		if ((searchParams.get('q') ?? '') === debouncedSearch) return;
+		setFilter('q', debouncedSearch);
+	}, [debouncedSearch, searchParams, setFilter]);
 
 	const filters = useMemo<IncidentFilters>(
 		() => ({
@@ -144,19 +168,32 @@ export function IncidentsListPage() {
 		[debouncedSearch, status, type, priority, assigneeId, overdue]
 	);
 
-	const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useIncidents(filters);
-	const incidents = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
+	// Board needs every matching incident for its columns; the table/cards paginate.
+	const pageSize = view === 'board' ? BOARD_PAGE_SIZE : TABLE_PAGE_SIZE;
+	const urlPage = Math.max(1, Number(searchParams.get('page')) || 1);
+	const page = view === 'board' ? 1 : urlPage;
+
+	const { data, isLoading, isError, refetch } = useIncidents(filters, page, pageSize);
+	const incidents = useMemo(() => data?.items ?? [], [data]);
 	const cardIncidents = useMemo(() => sortIncidents(incidents, sort), [incidents, sort]);
-	const total = data?.pages[0]?.total ?? 0;
+	const total = data?.total ?? 0;
 	const hasFilters = Boolean(debouncedSearch || status || type || priority || assigneeId || overdue);
 
 	useEffect(() => {
 		localStorage.setItem('incidents-view', view);
 	}, [view]);
 
+	// Clear any selection when the filter set changes (selected rows may no longer be shown).
 	useEffect(() => {
-		if (view === 'board' && hasNextPage && !isFetchingNextPage) fetchNextPage();
-	}, [view, hasNextPage, isFetchingNextPage, fetchNextPage]);
+		setRowSelection({});
+	}, [filters]);
+
+	// Clamp a deep-linked page that's now out of range (e.g. filters narrowed the results).
+	useEffect(() => {
+		const totalPages = Math.max(1, Math.ceil(total / pageSize));
+		if (view !== 'board' && total > 0 && urlPage > totalPages) setPage(totalPages);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [total, pageSize, urlPage, view]);
 
 	const columns = useMemo(
 		() => [
@@ -193,19 +230,20 @@ export function IncidentsListPage() {
 		setSearchParams({}, { replace: true });
 	}
 
-	// Export every incident matching the current filters, not just the loaded page:
-	// drain remaining pages first, then build the file from the full set.
+	// Export every incident matching the current filters, not just the current page:
+	// walk all pages, then build the file from the full set.
 	async function handleExport() {
 		setIsExporting(true);
 		try {
-			let pages = data?.pages ?? [];
-			let res = hasNextPage ? await fetchNextPage() : undefined;
+			const all: Incident[] = [];
+			let p = 1;
 			let guard = 0;
-			while (res?.hasNextPage && guard++ < 200) {
-				res = await fetchNextPage();
+			for (;;) {
+				const res = await listIncidentsApi({ ...filters, page: p, limit: 100 });
+				all.push(...res.items);
+				if (all.length >= res.total || res.items.length === 0 || guard++ >= 200) break;
+				p++;
 			}
-			pages = res?.data?.pages ?? pages;
-			const all = pages.flatMap((page) => page.items);
 			const { exportIncidentsXlsx } = await import('@/lib/export-xlsx');
 			await exportIncidentsXlsx(all);
 		} finally {
@@ -386,7 +424,7 @@ export function IncidentsListPage() {
 
 			{incidents.length > 0 && (
 				<>
-					<p className="mb-2 text-xs text-slate-500 dark:text-slate-400">{t('incidents.showing', { shown: incidents.length, total })}</p>
+					{view === 'board' && <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">{t('incidents.showing', { shown: incidents.length, total })}</p>}
 					{isAdmin && view === 'table' && (
 						<SelectionBar count={selectedIds.length} onClear={clearSelection}>
 							<Select aria-label={t('incidents.bulkStatus')} value="" placeholder={t('incidents.bulkStatus')} hidePlaceholderOption options={toOptions(STATUSES)} disabled={bulkUpdate.isPending} onChange={(v) => v && applyBulk({ status: v as Status })} className="min-w-36" />
@@ -422,13 +460,7 @@ export function IncidentsListPage() {
 				</>
 			)}
 
-			{view === 'table' && hasNextPage && (
-				<div className="mt-4 text-center">
-					<Button variant="secondary" onClick={() => fetchNextPage()} loading={isFetchingNextPage}>
-						{isFetchingNextPage ? t('common.loading') : t('incidents.loadMore')}
-					</Button>
-				</div>
-			)}
+			{view === 'table' && incidents.length > 0 && <Pagination page={page} pageSize={pageSize} total={total} onPageChange={setPage} />}
 
 			<ConfirmDialog
 				open={confirmDeleteId !== null}

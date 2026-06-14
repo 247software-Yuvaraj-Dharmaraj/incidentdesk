@@ -122,7 +122,7 @@ export function IncidentCreateDrawer({ onClose, onCreated }: { onClose: () => vo
 								id="dueDate"
 								type="date"
 								value={field.value ? new Date(field.value).toISOString().slice(0, 10) : ''}
-								onChange={(e) => field.onChange(e.target.value ? new Date(`${e.target.value}T00:00:00`).toISOString() : undefined)}
+								onChange={(e) => field.onChange(e.target.value ? new Date(`${e.target.value}T00:00:00Z`).toISOString() : undefined)}
 								className="cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-slate-700"
 							/>
 						</div>

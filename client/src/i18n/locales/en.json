@@ -100,6 +100,10 @@
 		"overdue": "Overdue",
 		"overdueOnly": "Overdue only",
 		"showing": "Showing {{shown}} of {{total}}",
+		"showingRange": "Showing {{from}}–{{to}} of {{total}}",
+		"pagination": "Pagination",
+		"prevPage": "Previous page",
+		"nextPage": "Next page",
 		"export": "Export",
 		"bulkStatus": "Set status…",
 		"bulkAssign": "Assign…"

@@ -60,7 +60,6 @@ export function isOverdue(incident: Pick<Incident, 'dueDate' | 'status'>): boole
 
 export interface IncidentPage {
 	items: Incident[];
-	nextCursor: string | null;
 	total: number;
 }
 

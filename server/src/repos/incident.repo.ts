@@ -66,7 +66,7 @@ export function updateIncident(id: string, data: Prisma.IncidentUpdateInput, act
 
 interface ListArgs {
 	where: Prisma.IncidentWhereInput;
-	cursor?: string;
+	page: number;
 	limit: number;
 }
 
@@ -87,25 +87,21 @@ export function deleteIncidentsByIds(ids: string[]) {
 	return prisma.incident.deleteMany({ where: { id: { in: ids } } });
 }
 
-export async function listIncidents({ where, cursor, limit }: ListArgs) {
-	// Fetch one extra row to determine whether another page exists; count the full
-	// filtered set in parallel so the UI can show "showing N of total".
-	const [rows, total] = await Promise.all([
+export async function listIncidents({ where, page, limit }: ListArgs) {
+	// Offset pagination: a stable sort (createdAt, then id as a tiebreaker) plus the
+	// total count so the UI can render numbered pages and "showing A–B of N".
+	const [items, total] = await Promise.all([
 		prisma.incident.findMany({
 			where,
 			select: listSelect,
-			orderBy: { createdAt: 'desc' },
-			take: limit + 1,
-			...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+			orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+			skip: (page - 1) * limit,
+			take: limit,
 		}),
 		prisma.incident.count({ where }),
 	]);
 
-	const hasMore = rows.length > limit;
-	const items = hasMore ? rows.slice(0, limit) : rows;
-	const nextCursor = hasMore ? items[items.length - 1].id : null;
-
-	return { items, nextCursor, total };
+	return { items, total };
 }
 
 /** Created/resolved timestamps of resolved incidents — for mean-time-to-resolution. */

@@ -17,7 +17,7 @@ import { PRIORITIES, isOverdue, type Priority, type Status } from '@/types/incid
 
 const toOptions = (values: string[]) => values.map((v) => ({ label: v.replace('_', ' '), value: v }));
 const toDateInput = (iso: string | null) => (iso ? new Date(iso).toISOString().slice(0, 10) : '');
-const fromDateInput = (value: string) => (value ? new Date(`${value}T00:00:00`).toISOString() : null);
+const fromDateInput = (value: string) => (value ? new Date(`${value}T00:00:00Z`).toISOString() : null);
 
 type Tab = 'overview' | 'activity' | 'comments';
 

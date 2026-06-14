@@ -3,7 +3,7 @@ import { type CreateIncidentValues } from '@/schemas/incident.schema';
 import { type Comment, type Incident, type IncidentFilters, type IncidentMetrics, type IncidentPage } from '@/types/incident';
 
 interface ListParams extends IncidentFilters {
-	cursor?: string;
+	page?: number;
 	limit?: number;
 }
 

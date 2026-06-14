@@ -52,8 +52,8 @@ export const listIncidentsQuerySchema = z.object({
 		.enum(['true', 'false'])
 		.transform((v) => v === 'true')
 		.optional(),
-	cursor: z.string().cuid().optional(),
-	limit: z.coerce.number().int().min(1).max(50).default(10),
+	page: z.coerce.number().int().min(1).default(1),
+	limit: z.coerce.number().int().min(1).max(100).default(10),
 });
 
 export const triageSchema = z.object({

@@ -48,7 +48,7 @@ export function listIncidentsForUser(query: ListIncidentsQuery, user: AuthUser) 
 		...(user.role === Role.REPORTER ? { reporterId: user.id } : {}),
 	};
 
-	return listIncidents({ where, cursor: query.cursor, limit: query.limit });
+	return listIncidents({ where, page: query.page, limit: query.limit });
 }
 
 const TREND_DAYS = 14;

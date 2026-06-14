@@ -100,6 +100,10 @@
 		"overdue": "Vencido",
 		"overdueOnly": "Solo vencidos",
 		"showing": "Mostrando {{shown}} de {{total}}",
+		"showingRange": "Mostrando {{from}}–{{to}} de {{total}}",
+		"pagination": "Paginación",
+		"prevPage": "Página anterior",
+		"nextPage": "Página siguiente",
 		"export": "Exportar",
 		"bulkStatus": "Cambiar estado…",
 		"bulkAssign": "Asignar…"

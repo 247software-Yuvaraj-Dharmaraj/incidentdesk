@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { toast } from 'sonner';
 import i18n from '@/i18n';
@@ -14,12 +14,12 @@ export const incidentKeys = {
 	comments: (id: string) => ['incidents', 'detail', id, 'comments'] as const,
 };
 
-export function useIncidents(filters: IncidentFilters) {
-	return useInfiniteQuery({
-		queryKey: incidentKeys.list(filters),
-		queryFn: ({ pageParam }) => incidentsApi.listIncidents({ ...filters, cursor: pageParam, limit: PAGE_SIZE }),
-		initialPageParam: undefined as string | undefined,
-		getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+export function useIncidents(filters: IncidentFilters, page: number, pageSize = PAGE_SIZE) {
+	return useQuery({
+		queryKey: [...incidentKeys.list(filters), page, pageSize],
+		queryFn: () => incidentsApi.listIncidents({ ...filters, page, limit: pageSize }),
+		// Keep the previous page on screen while the next one loads (no flash/jump).
+		placeholderData: keepPreviousData,
 	});
 }
 
@@ -95,18 +95,8 @@ export function useUpdateIncident() {
 				queryClient.setQueryData<Incident>(incidentKeys.detail(id), { ...prevDetail, ...patch });
 			}
 
-			const prevLists = queryClient.getQueriesData<InfiniteData<IncidentPage>>({ queryKey: ['incidents', 'list'] });
-			queryClient.setQueriesData<InfiniteData<IncidentPage>>({ queryKey: ['incidents', 'list'] }, (old) =>
-				old
-					? {
-							...old,
-							pages: old.pages.map((page) => ({
-								...page,
-								items: page.items.map((item) => (item.id === id ? { ...item, ...patch } : item)),
-							})),
-						}
-					: old
-			);
+			const prevLists = queryClient.getQueriesData<IncidentPage>({ queryKey: ['incidents', 'list'] });
+			queryClient.setQueriesData<IncidentPage>({ queryKey: ['incidents', 'list'] }, (old) => (old ? { ...old, items: old.items.map((item) => (item.id === id ? { ...item, ...patch } : item)) } : old));
 
 			// Confirm immediately — the UI already reflects the change (optimistic).
 			const toastId = toast.success(i18n.t('toast.incidentUpdated'));
