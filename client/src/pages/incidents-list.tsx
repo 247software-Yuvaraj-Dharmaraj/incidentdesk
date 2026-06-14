@@ -7,7 +7,6 @@ import { useBulkDelete, useBulkUpdate, useDeleteIncident, useIncidents } from '@
 import { useDebounce } from '@/hooks/use-debounce';
 import { useUsers } from '@/hooks/use-users';
 import { useAuth } from '@/context/auth-context';
-import { exportIncidentsCsv } from '@/lib/export-csv';
 import { StatusBadge, PriorityBadge, OverdueBadge } from '@/components/badges';
 import { IncidentBoard } from '@/components/incident-board';
 import { ConfirmDialog } from '@/components/confirm-dialog';
@@ -192,7 +191,7 @@ export function IncidentsListPage() {
 								);
 							})}
 						</div>
-						<Button variant="secondary" size="md" onClick={() => exportIncidentsCsv(incidents)} disabled={incidents.length === 0}>
+						<Button variant="secondary" size="md" onClick={() => import('@/lib/export-xlsx').then((m) => m.exportIncidentsXlsx(incidents))} disabled={incidents.length === 0}>
 							<Download className="h-4 w-4" />
 							{t('incidents.export')}
 						</Button>
