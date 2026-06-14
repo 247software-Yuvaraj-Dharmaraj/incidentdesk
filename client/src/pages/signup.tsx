@@ -33,7 +33,7 @@ export function SignupPage() {
 	}
 
 	return (
-		<div className="bg-canvas dark:bg-canvas-dark flex min-h-screen items-center justify-center px-4">
+		<div className="auth-bg flex min-h-screen items-center justify-center px-4">
 			<Card className="w-full max-w-sm p-8 shadow-sm">
 				<Logo className="mb-6" />
 				<h1 className="mb-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{t('auth.createAccount')}</h1>

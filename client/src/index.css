@@ -33,6 +33,19 @@
 	}
 }
 
+/* Auth screens: warm canvas with a soft brand glow at the top for a designed
+   first impression (kept very subtle so it never competes with the form). */
+.auth-bg {
+	background:
+		radial-gradient(70% 55% at 50% -8%, color-mix(in srgb, var(--color-brand) 10%, transparent), transparent 70%),
+		var(--color-canvas);
+}
+[data-theme='dark'] .auth-bg {
+	background:
+		radial-gradient(70% 55% at 50% -8%, color-mix(in srgb, var(--color-brand) 22%, transparent), transparent 70%),
+		var(--color-canvas-dark);
+}
+
 /* Gentle pulse for the branded loader logo. */
 @keyframes id-logo-pulse {
 	0%,

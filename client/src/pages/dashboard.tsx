@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Inbox, Plus } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 import { useDensity } from '@/context/density-context';
 import { useIncidentMetrics, useIncidentStats } from '@/hooks/use-incidents';
 import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { buttonClasses } from '@/components/ui/button';
 import { TrendChart } from '@/components/trend-chart';
 
 const CARDS: { key: 'total' | 'OPEN' | 'IN_PROGRESS' | 'RESOLVED'; labelKey: string; accent: string }[] = [
@@ -47,12 +50,18 @@ export function DashboardPage() {
 			</p>
 
 			{isEmpty ? (
-				<Card className="mt-6 flex flex-col items-center gap-2 p-12 text-center">
-					<p className="font-medium text-slate-700 dark:text-slate-200">{t('dashboard.emptyTitle')}</p>
-					<p className="text-sm text-slate-500 dark:text-slate-400">{t('dashboard.emptyHint')}</p>
-					<Link to="/incidents/new" className="mt-2 text-sm font-medium text-slate-900 underline dark:text-slate-100">
-						{t('incidents.createFirst')}
-					</Link>
+				<Card className="mt-6">
+					<EmptyState
+						icon={<Inbox className="h-6 w-6" />}
+						title={t('dashboard.emptyTitle')}
+						hint={t('dashboard.emptyHint')}
+						action={
+							<Link to="/incidents/new" className={`${buttonClasses('primary')} mt-1`}>
+								<Plus className="h-4 w-4" />
+								{t('incidents.createFirst')}
+							</Link>
+						}
+					/>
 				</Card>
 			) : (
 				<>

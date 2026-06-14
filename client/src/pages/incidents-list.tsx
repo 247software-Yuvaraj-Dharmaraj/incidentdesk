@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useMatch, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { createColumnHelper, type RowSelectionState } from '@tanstack/react-table';
-import { Download, LayoutGrid, Pencil, Plus, Search, Table2, Trash2, X } from 'lucide-react';
+import { Download, Inbox, LayoutGrid, Pencil, Plus, Search, SearchX, Table2, Trash2, X } from 'lucide-react';
 import { useBulkDelete, useBulkUpdate, useDeleteIncident, useIncidents } from '@/hooks/use-incidents';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useUsers } from '@/hooks/use-users';
@@ -18,6 +18,7 @@ import { Select } from '@/components/ui/select';
 import { Button, buttonClasses } from '@/components/ui/button';
 import { ActionMenu } from '@/components/ui/action-menu';
 import { SelectionBar } from '@/components/ui/selection-bar';
+import { EmptyState } from '@/components/ui/empty-state';
 import { IncidentDetailDrawer } from '@/components/incident-detail-drawer';
 import { IncidentCreateDrawer } from '@/components/incident-create-drawer';
 import { INCIDENT_TYPES, PRIORITIES, STATUSES, isOverdue, type Incident, type IncidentFilters, type IncidentType, type Priority, type Status } from '@/types/incident';
@@ -264,12 +265,30 @@ export function IncidentsListPage() {
 			)}
 
 			{!isLoading && !isError && incidents.length === 0 && (
-				<div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center dark:border-slate-700 dark:bg-slate-900">
-					<p className="text-slate-500 dark:text-slate-400">{hasFilters ? t('incidents.noMatch') : t('incidents.noneYet')}</p>
-					{!hasFilters && (
-						<Link to="/incidents/new" className="mt-2 inline-block text-sm font-medium text-slate-900 underline dark:text-slate-100">
-							{t('incidents.createFirst')}
-						</Link>
+				<div className="rounded-xl border border-dashed border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900">
+					{hasFilters ? (
+						<EmptyState
+							icon={<SearchX className="h-6 w-6" />}
+							title={t('incidents.noMatch')}
+							hint={t('incidents.noMatchHint')}
+							action={
+								<Button variant="secondary" size="sm" onClick={clearFilters}>
+									{t('incidents.clear')}
+								</Button>
+							}
+						/>
+					) : (
+						<EmptyState
+							icon={<Inbox className="h-6 w-6" />}
+							title={t('incidents.noneYet')}
+							hint={t('incidents.noneYetHint')}
+							action={
+								<Link to="/incidents/new" className={`${buttonClasses('primary')} mt-1`}>
+									<Plus className="h-4 w-4" />
+									{t('incidents.createFirst')}
+								</Link>
+							}
+						/>
 					)}
 				</div>
 			)}
