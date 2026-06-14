@@ -48,7 +48,7 @@ export function AppLayout() {
 						<Link to="/dashboard" className="text-brand shrink-0 text-lg font-bold" onClick={() => setMenuOpen(false)}>
 							IncidentDesk
 						</Link>
-						<nav aria-label={t('nav.primary')} className="hidden items-center gap-1 text-sm md:flex">
+						<nav aria-label={t('nav.primary')} className="hidden items-center gap-1 text-sm lg:flex">
 							{navItems.map((item) => (
 								<NavLink
 									key={item.to}
@@ -64,7 +64,7 @@ export function AppLayout() {
 					</div>
 
 					{/* Desktop controls */}
-					<div className="hidden items-center gap-4 md:flex">
+					<div className="hidden items-center gap-4 lg:flex">
 						{liveIndicator}
 						<span className="text-sm text-slate-500 dark:text-slate-400">
 							{user?.fullName} · <span className="font-medium text-slate-700 dark:text-slate-300">{user?.role}</span>
@@ -79,7 +79,7 @@ export function AppLayout() {
 					</div>
 
 					{/* Mobile menu toggle */}
-					<div className="flex items-center gap-3 md:hidden">
+					<div className="flex items-center gap-3 lg:hidden">
 						{liveIndicator}
 						<button
 							type="button"
@@ -96,7 +96,7 @@ export function AppLayout() {
 
 				{/* Mobile menu panel */}
 				{menuOpen && (
-					<div id="mobile-menu" className="border-t border-slate-200 px-4 py-4 md:hidden dark:border-slate-800">
+					<div id="mobile-menu" className="border-t border-slate-200 px-4 py-4 lg:hidden dark:border-slate-800">
 						<nav aria-label={t('nav.primary')} className="flex flex-col gap-1 text-sm">
 							{navItems.map((item) => (
 								<NavLink
