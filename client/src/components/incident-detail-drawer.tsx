@@ -87,7 +87,7 @@ export function IncidentDetailDrawer({ id, onClose }: { id: string; onClose: () 
 
 					{tab === 'overview' && (
 						<div className={`flex flex-col ${compact ? 'gap-3' : 'gap-5'}`}>
-							<dl className={`grid grid-cols-1 text-sm sm:grid-cols-2 ${compact ? 'gap-3' : 'gap-4'}`}>
+							<dl className={`grid grid-cols-1 sm:grid-cols-2 ${compact ? 'gap-3 text-xs' : 'gap-4 text-sm'}`}>
 								<Field label={t('detail.type')} value={incident.type} />
 								<div>
 									<Dt>{t('detail.reportedBy')}</Dt>

@@ -18,6 +18,13 @@ export function DensityProvider({ children }: { children: ReactNode }) {
 
 	useEffect(() => {
 		localStorage.setItem('density', density);
+		// Compact scales the root font size down. Since Tailwind sizes type, padding,
+		// gaps, and margins in rem, this condenses the entire app proportionally —
+		// even surfaces with no explicit density styling. Per-component tweaks layer
+		// on top of this for extra emphasis in dense areas (lists, tables, cards).
+		const root = document.documentElement;
+		root.dataset.density = density;
+		root.style.fontSize = density === 'compact' ? '15px' : '';
 	}, [density]);
 
 	const toggleDensity = useCallback(() => {

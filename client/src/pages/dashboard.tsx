@@ -27,6 +27,7 @@ export function DashboardPage() {
 	const compact = density === 'compact';
 	const cardPad = compact ? 'p-4' : 'p-5';
 	const gridGap = compact ? 'gap-3' : 'gap-4';
+	const valueText = compact ? 'text-2xl' : 'text-3xl';
 	const { data: stats, isLoading } = useIncidentStats();
 	const { data: metrics } = useIncidentMetrics();
 
@@ -59,12 +60,12 @@ export function DashboardPage() {
 						{CARDS.map((card) => (
 							<Card key={card.key} className={cardPad}>
 								<p className="text-xs tracking-wide text-slate-400 uppercase dark:text-slate-500">{t(card.labelKey)}</p>
-								{isLoading ? <div className="mt-2 h-8 w-12 animate-pulse rounded bg-slate-100 dark:bg-slate-800" /> : <p className={`mt-1 text-3xl font-bold ${card.accent}`}>{valueFor(card.key)}</p>}
+								{isLoading ? <div className="mt-2 h-8 w-12 animate-pulse rounded bg-slate-100 dark:bg-slate-800" /> : <p className={`mt-1 font-bold ${valueText} ${card.accent}`}>{valueFor(card.key)}</p>}
 							</Card>
 						))}
 						<Card className={cardPad}>
 							<p className="text-xs tracking-wide text-slate-400 uppercase dark:text-slate-500">{t('dashboard.mttr')}</p>
-							<p className="text-brand mt-1 text-3xl font-bold">{mttr ?? '—'}</p>
+							<p className={`text-brand mt-1 font-bold ${valueText}`}>{mttr ?? '—'}</p>
 						</Card>
 					</div>
 
