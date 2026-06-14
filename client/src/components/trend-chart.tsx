@@ -23,15 +23,23 @@ export function TrendChart({ data, createdLabel, resolvedLabel }: Props) {
 				</span>
 			</div>
 
-			<div className="mt-3 flex h-40 items-end gap-1">
+			<div className="mt-3 flex h-40 items-end gap-1 border-b border-slate-200 dark:border-slate-800">
 				{data.map((d) => (
-					<div key={d.date} className="flex flex-1 flex-col items-center gap-1" title={`${new Date(`${d.date}T00:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} · ${createdLabel} ${d.created} · ${resolvedLabel} ${d.resolved}`}>
-						<div className="flex h-full w-full items-end justify-center gap-0.5">
-							<div className="bg-brand w-1/2 rounded-t-sm transition-all" style={{ height: `${(d.created / max) * 100}%` }} />
-							<div className="w-1/2 rounded-t-sm bg-green-500 transition-all" style={{ height: `${(d.resolved / max) * 100}%` }} />
-						</div>
-						<span className="text-[10px] text-slate-400 dark:text-slate-500">{new Date(`${d.date}T00:00:00`).getDate()}</span>
+					<div
+						key={d.date}
+						className="flex h-full flex-1 items-end justify-center gap-0.5"
+						title={`${new Date(`${d.date}T00:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} · ${createdLabel} ${d.created} · ${resolvedLabel} ${d.resolved}`}
+					>
+						<div className="bg-brand w-1/2 rounded-t-sm transition-all" style={{ height: d.created ? `max(${(d.created / max) * 100}%, 3px)` : '0' }} />
+						<div className="w-1/2 rounded-t-sm bg-green-500 transition-all" style={{ height: d.resolved ? `max(${(d.resolved / max) * 100}%, 3px)` : '0' }} />
 					</div>
+				))}
+			</div>
+			<div className="mt-1 flex gap-1">
+				{data.map((d) => (
+					<span key={d.date} className="flex-1 text-center text-[10px] text-slate-400 dark:text-slate-500">
+						{new Date(`${d.date}T00:00:00`).getDate()}
+					</span>
 				))}
 			</div>
 		</div>

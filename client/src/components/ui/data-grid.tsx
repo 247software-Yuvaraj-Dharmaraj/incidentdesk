@@ -13,7 +13,7 @@ interface DataGridProps<T> {
 	onRowSelectionChange?: OnChangeFn<RowSelectionState>;
 }
 
-const checkboxClasses = 'h-4 w-4 cursor-pointer rounded border-slate-300 text-brand accent-brand focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-600';
+const checkboxClasses = 'id-checkbox';
 
 /** Reusable sortable data grid built on TanStack Table. Density-aware; optional row selection. */
 export function DataGrid<T>({ columns, data, minWidth = '640px', getRowId, rowSelection, onRowSelectionChange }: DataGridProps<T>) {

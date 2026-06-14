@@ -507,7 +507,7 @@ function IncidentCardList({ incidents, isAdmin, sort, onSortChange, rowSelection
 											checked={selected}
 											onChange={() => onToggleSelect(incident.id)}
 											aria-label={t('incidents.selectRow', { title: incident.title })}
-											className="text-brand accent-brand mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-slate-300 focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-600"
+											className="id-checkbox mt-0.5"
 										/>
 									)}
 									<Link to={linkFor(`/incidents/${incident.id}`)} title={incident.title} className={`min-w-0 font-medium text-slate-900 hover:underline dark:text-slate-100 ${compact ? 'text-sm' : ''}`}>

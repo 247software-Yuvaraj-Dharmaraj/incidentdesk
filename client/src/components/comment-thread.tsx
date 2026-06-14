@@ -132,7 +132,7 @@ export function CommentThread({ incidentId }: { incidentId: string }) {
 				<div className="flex items-center justify-between gap-3">
 					{isAdmin ? (
 						<label className="flex cursor-pointer items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-							<input type="checkbox" checked={internal} onChange={(e) => setInternal(e.target.checked)} className="text-brand accent-brand h-4 w-4 cursor-pointer rounded border-slate-300 dark:border-slate-600" />
+							<input type="checkbox" checked={internal} onChange={(e) => setInternal(e.target.checked)} className="id-checkbox" />
 							{t('comments.internalNote')}
 						</label>
 					) : (

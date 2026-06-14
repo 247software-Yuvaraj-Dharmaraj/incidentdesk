@@ -57,7 +57,9 @@
 		"trend": "Actividad (últimos 14 días)",
 		"created": "Creados",
 		"emptyTitle": "Aún no hay incidencias",
-		"emptyHint": "Crea tu primera incidencia para ver estadísticas y tendencias aquí."
+		"emptyHint": "Crea tu primera incidencia para ver estadísticas y tendencias aquí.",
+		"trendEmptyTitle": "Sin actividad en los últimos 14 días",
+		"trendEmptyHint": "Las incidencias nuevas y resueltas aparecerán aquí."
 	},
 	"incidents": {
 		"title": "Incidentes",

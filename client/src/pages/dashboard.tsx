@@ -81,7 +81,14 @@ export function DashboardPage() {
 					{metrics && metrics.trend.length > 0 && (
 						<Card className={`mt-6 ${compact ? 'p-4' : 'p-6'}`}>
 							<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-slate-100">{t('dashboard.trend')}</h2>
-							<TrendChart data={metrics.trend} createdLabel={t('dashboard.created')} resolvedLabel={t('dashboard.resolved')} />
+							{metrics.trend.some((d) => d.created > 0 || d.resolved > 0) ? (
+								<TrendChart data={metrics.trend} createdLabel={t('dashboard.created')} resolvedLabel={t('dashboard.resolved')} />
+							) : (
+								<div className="flex h-40 flex-col items-center justify-center gap-1 text-center">
+									<p className="text-sm font-medium text-slate-600 dark:text-slate-300">{t('dashboard.trendEmptyTitle')}</p>
+									<p className="text-xs text-slate-400 dark:text-slate-500">{t('dashboard.trendEmptyHint')}</p>
+								</div>
+							)}
 						</Card>
 					)}
 
