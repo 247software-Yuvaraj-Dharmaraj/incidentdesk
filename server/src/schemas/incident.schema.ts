@@ -9,6 +9,7 @@ export const createIncidentSchema = z.object({
 	type: z.nativeEnum(IncidentType).default(IncidentType.INCIDENT),
 	priority: z.nativeEnum(Priority).default(Priority.MEDIUM),
 	description: descriptionField,
+	dueDate: z.string().datetime().nullable().optional(),
 });
 
 export const updateIncidentSchema = z

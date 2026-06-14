@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useMatch, useNavigate, useParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useMatch, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { createColumnHelper, type RowSelectionState } from '@tanstack/react-table';
 import { Download, Inbox, LayoutGrid, Pencil, Plus, Search, SearchX, Table2, Trash2, X } from 'lucide-react';
@@ -29,6 +29,22 @@ const columnHelper = createColumnHelper<Incident>();
 const toOptions = (values: string[]) => values.map((v) => ({ label: v.replace('_', ' '), value: v }));
 
 type View = 'table' | 'board';
+type SortKey = 'newest' | 'oldest' | 'priority' | 'status';
+
+/** Client-side sort for the mobile/tablet card list (the table sorts via its own headers). */
+function sortIncidents(list: Incident[], sort: SortKey): Incident[] {
+	const arr = [...list];
+	switch (sort) {
+		case 'oldest':
+			return arr.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+		case 'priority':
+			return arr.sort((a, b) => PRIORITY_RANK[b.priority] - PRIORITY_RANK[a.priority]);
+		case 'status':
+			return arr.sort((a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status]);
+		default:
+			return arr.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+	}
+}
 
 export function IncidentsListPage() {
 	const { t, i18n } = useTranslation();
@@ -39,15 +55,24 @@ export function IncidentsListPage() {
 	const isAdmin = user?.role === 'ADMIN';
 
 	const [view, setView] = useState<View>(() => (localStorage.getItem('incidents-view') === 'board' ? 'board' : 'table'));
-	const [search, setSearch] = useState('');
-	const [status, setStatus] = useState<Status | ''>('');
-	const [type, setType] = useState<IncidentType | ''>('');
-	const [priority, setPriority] = useState<Priority | ''>('');
-	const [assigneeId, setAssigneeId] = useState('');
-	const [overdue, setOverdue] = useState(false);
+
+	// Filters live in the URL (?q=&status=&type=&priority=&assignee=&overdue=) so they
+	// survive reloads and are shareable. The search box keeps a responsive local value
+	// and mirrors its debounced term into the URL.
+	const [searchParams, setSearchParams] = useSearchParams();
+	const listSearch = searchParams.toString();
+	const status = (searchParams.get('status') ?? '') as Status | '';
+	const type = (searchParams.get('type') ?? '') as IncidentType | '';
+	const priority = (searchParams.get('priority') ?? '') as Priority | '';
+	const assigneeId = searchParams.get('assignee') ?? '';
+	const overdue = searchParams.get('overdue') === 'true';
+
+	const [search, setSearch] = useState(() => searchParams.get('q') ?? '');
+	const [sort, setSort] = useState<SortKey>('newest');
 	const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 	const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 	const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
+	const [isExporting, setIsExporting] = useState(false);
 
 	const debouncedSearch = useDebounce(search, 300);
 	const { data: users } = useUsers(isAdmin);
@@ -55,6 +80,32 @@ export function IncidentsListPage() {
 	const bulkUpdate = useBulkUpdate();
 	const bulkDelete = useBulkDelete();
 	const selectedIds = Object.keys(rowSelection);
+
+	const setParam = useCallback(
+		(key: string, value: string) => {
+			setSearchParams(
+				(prev) => {
+					const next = new URLSearchParams(prev);
+					if (value) next.set(key, value);
+					else next.delete(key);
+					return next;
+				},
+				{ replace: true }
+			);
+		},
+		[setSearchParams]
+	);
+	const setStatus = (v: string) => setParam('status', v);
+	const setType = (v: string) => setParam('type', v);
+	const setPriority = (v: string) => setParam('priority', v);
+	const setAssigneeId = (v: string) => setParam('assignee', v);
+	const setOverdue = (v: boolean) => setParam('overdue', v ? 'true' : '');
+	// Build a path that carries the current filters, so opening/closing a drawer keeps them.
+	const withSearch = useCallback((pathname: string) => ({ pathname, search: listSearch }), [listSearch]);
+
+	useEffect(() => {
+		setParam('q', debouncedSearch);
+	}, [debouncedSearch, setParam]);
 
 	const filters = useMemo<IncidentFilters>(
 		() => ({
@@ -70,6 +121,7 @@ export function IncidentsListPage() {
 
 	const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useIncidents(filters);
 	const incidents = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
+	const cardIncidents = useMemo(() => sortIncidents(incidents, sort), [incidents, sort]);
 	const total = data?.pages[0]?.total ?? 0;
 	const hasFilters = Boolean(debouncedSearch || status || type || priority || assigneeId || overdue);
 
@@ -87,7 +139,7 @@ export function IncidentsListPage() {
 				header: t('incidents.col.title'),
 				cell: (info) => (
 					<div className="flex items-center gap-2">
-						<Link to={`/incidents/${info.row.original.id}`} title={info.getValue()} className="block max-w-xs truncate font-medium text-slate-900 hover:underline dark:text-slate-100">
+						<Link to={withSearch(`/incidents/${info.row.original.id}`)} title={info.getValue()} className="block max-w-xs truncate font-medium text-slate-900 hover:underline dark:text-slate-100">
 							{info.getValue()}
 						</Link>
 						{isOverdue(info.row.original) && <OverdueBadge label={t('incidents.overdue')} />}
@@ -108,7 +160,7 @@ export function IncidentsListPage() {
 									<ActionMenu
 										label={t('incidents.col.actions')}
 										items={[
-											{ key: 'edit', label: t('common.edit'), icon: <Pencil className="h-4 w-4" />, onSelect: () => navigate(`/incidents/${info.row.original.id}`) },
+											{ key: 'edit', label: t('common.edit'), icon: <Pencil className="h-4 w-4" />, onSelect: () => navigate(withSearch(`/incidents/${info.row.original.id}`)) },
 											{ key: 'delete', label: t('common.delete'), icon: <Trash2 className="h-4 w-4" />, destructive: true, onSelect: () => setConfirmDeleteId(info.row.original.id) },
 										]}
 									/>
@@ -118,16 +170,41 @@ export function IncidentsListPage() {
 					]
 				: []),
 		],
-		[t, i18n.resolvedLanguage, isAdmin, navigate]
+		[t, i18n.resolvedLanguage, isAdmin, navigate, withSearch]
 	);
 
 	function clearFilters() {
 		setSearch('');
-		setStatus('');
-		setType('');
-		setPriority('');
-		setAssigneeId('');
-		setOverdue(false);
+		setSearchParams({}, { replace: true });
+	}
+
+	// Export every incident matching the current filters, not just the loaded page:
+	// drain remaining pages first, then build the file from the full set.
+	async function handleExport() {
+		setIsExporting(true);
+		try {
+			let pages = data?.pages ?? [];
+			let res = hasNextPage ? await fetchNextPage() : undefined;
+			let guard = 0;
+			while (res?.hasNextPage && guard++ < 200) {
+				res = await fetchNextPage();
+			}
+			pages = res?.data?.pages ?? pages;
+			const all = pages.flatMap((page) => page.items);
+			const { exportIncidentsXlsx } = await import('@/lib/export-xlsx');
+			await exportIncidentsXlsx(all);
+		} finally {
+			setIsExporting(false);
+		}
+	}
+
+	function toggleCardSelection(id: string) {
+		setRowSelection((prev) => {
+			const next = { ...prev };
+			if (next[id]) delete next[id];
+			else next[id] = true;
+			return next;
+		});
 	}
 
 	async function handleDelete() {
@@ -193,11 +270,11 @@ export function IncidentsListPage() {
 								);
 							})}
 						</div>
-						<Button variant="secondary" size="md" onClick={() => import('@/lib/export-xlsx').then((m) => m.exportIncidentsXlsx(incidents))} disabled={incidents.length === 0}>
+						<Button variant="secondary" size="md" onClick={handleExport} loading={isExporting} disabled={incidents.length === 0 || isExporting}>
 							<Download className="h-4 w-4" />
 							{t('incidents.export')}
 						</Button>
-						<Link to="/incidents/new" className={buttonClasses('primary')}>
+						<Link to={withSearch('/incidents/new')} className={buttonClasses('primary')}>
 							<Plus className="h-4 w-4" />
 							{t('incidents.new')}
 						</Link>
@@ -223,7 +300,7 @@ export function IncidentsListPage() {
 				{isAdmin && <Select value={assigneeId} onChange={(v) => setAssigneeId(v)} placeholder={t('incidents.allAssignees')} options={assigneeOptions} className="min-w-44" />}
 				<button
 					type="button"
-					onClick={() => setOverdue((v) => !v)}
+					onClick={() => setOverdue(!overdue)}
 					aria-pressed={overdue}
 					className={`rounded-lg border px-3 py-2 text-sm font-medium transition ${overdue ? 'border-red-300 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300' : 'border-slate-300 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800'}`}
 				>
@@ -282,7 +359,7 @@ export function IncidentsListPage() {
 							title={t('incidents.noneYet')}
 							hint={t('incidents.noneYetHint')}
 							action={
-								<Link to="/incidents/new" className={`${buttonClasses('primary')} mt-1`}>
+								<Link to={withSearch('/incidents/new')} className={`${buttonClasses('primary')} mt-1`}>
 									<Plus className="h-4 w-4" />
 									{t('incidents.createFirst')}
 								</Link>
@@ -309,8 +386,18 @@ export function IncidentsListPage() {
 						<IncidentBoard incidents={incidents} canDrag={isAdmin} />
 					) : (
 						<>
-							{/* Phones/tablets: stacked cards (the wide table needs horizontal room it doesn't have here). */}
-							<IncidentCardList incidents={incidents} isAdmin={isAdmin} onEdit={(id) => navigate(`/incidents/${id}`)} onDelete={setConfirmDeleteId} />
+							{/* Phones/tablets: stacked cards with their own sort + (admin) selection. */}
+							<IncidentCardList
+								incidents={cardIncidents}
+								isAdmin={isAdmin}
+								sort={sort}
+								onSortChange={setSort}
+								rowSelection={rowSelection}
+								onToggleSelect={toggleCardSelection}
+								onEdit={(id) => navigate(withSearch(`/incidents/${id}`))}
+								onDelete={setConfirmDeleteId}
+								linkFor={withSearch}
+							/>
 							{/* Desktop: full sortable/selectable data grid. */}
 							<div className="hidden lg:block">
 								<DataGrid columns={columns} data={incidents} {...(isAdmin ? { getRowId: (r: Incident) => r.id, rowSelection, onRowSelectionChange: setRowSelection } : {})} />
@@ -350,14 +437,27 @@ export function IncidentsListPage() {
 				destructive
 			/>
 
-			{isNew && <IncidentCreateDrawer onClose={() => navigate('/incidents')} onCreated={(id) => navigate(`/incidents/${id}`)} />}
-			{detailId && <IncidentDetailDrawer id={detailId} onClose={() => navigate('/incidents')} />}
+			{isNew && <IncidentCreateDrawer onClose={() => navigate(withSearch('/incidents'))} onCreated={(id) => navigate(withSearch(`/incidents/${id}`))} />}
+			{detailId && <IncidentDetailDrawer id={detailId} onClose={() => navigate(withSearch('/incidents'))} />}
 		</div>
 	);
 }
 
-/** Stacked card list shown on phones/tablets (below lg), where the wide table can't fit. */
-function IncidentCardList({ incidents, isAdmin, onEdit, onDelete }: { incidents: Incident[]; isAdmin: boolean; onEdit: (id: string) => void; onDelete: (id: string) => void }) {
+interface CardListProps {
+	incidents: Incident[];
+	isAdmin: boolean;
+	sort: SortKey;
+	onSortChange: (sort: SortKey) => void;
+	rowSelection: RowSelectionState;
+	onToggleSelect: (id: string) => void;
+	onEdit: (id: string) => void;
+	onDelete: (id: string) => void;
+	linkFor: (pathname: string) => { pathname: string; search: string };
+}
+
+/** Stacked card list shown on phones/tablets (below lg), where the wide table can't fit.
+ *  Carries its own sort control and (for admins) selection so bulk actions work here too. */
+function IncidentCardList({ incidents, isAdmin, sort, onSortChange, rowSelection, onToggleSelect, onEdit, onDelete, linkFor }: CardListProps) {
 	const { t, i18n } = useTranslation();
 	const { density } = useDensity();
 	const compact = density === 'compact';
@@ -366,36 +466,63 @@ function IncidentCardList({ incidents, isAdmin, onEdit, onDelete }: { incidents:
 	const cardPad = compact ? 'p-3' : 'p-4';
 	const sectionMt = compact ? 'mt-2' : 'mt-3';
 
+	const sortOptions = [
+		{ label: t('incidents.sortNewest'), value: 'newest' },
+		{ label: t('incidents.sortOldest'), value: 'oldest' },
+		{ label: t('incidents.sortPriority'), value: 'priority' },
+		{ label: t('incidents.sortStatus'), value: 'status' },
+	];
+
 	return (
-		<ul className={`flex flex-col ${listGap} lg:hidden`}>
-			{incidents.map((incident) => (
-				<li key={incident.id} className={`rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md ${cardPad} dark:border-slate-800 dark:bg-slate-900`}>
-					<div className="flex items-start justify-between gap-2">
-						<Link to={`/incidents/${incident.id}`} title={incident.title} className={`font-medium text-slate-900 hover:underline dark:text-slate-100 ${compact ? 'text-sm' : ''}`}>
-							{incident.title}
-						</Link>
-						{isAdmin && (
-							<ActionMenu
-								label={t('incidents.col.actions')}
-								items={[
-									{ key: 'edit', label: t('common.edit'), icon: <Pencil className="h-4 w-4" />, onSelect: () => onEdit(incident.id) },
-									{ key: 'delete', label: t('common.delete'), icon: <Trash2 className="h-4 w-4" />, destructive: true, onSelect: () => onDelete(incident.id) },
-								]}
-							/>
-						)}
-					</div>
-					<div className={`${sectionMt} flex flex-wrap items-center gap-2`}>
-						<StatusBadge status={incident.status} />
-						<PriorityBadge priority={incident.priority} />
-						{isOverdue(incident) && <OverdueBadge label={t('incidents.overdue')} />}
-					</div>
-					<div className={`${sectionMt} flex items-center justify-between text-xs text-slate-500 dark:text-slate-400`}>
-						<span>{incident.type}</span>
-						<span>{new Date(incident.createdAt).toLocaleDateString(i18n.resolvedLanguage)}</span>
-					</div>
-				</li>
-			))}
-		</ul>
+		<div className="lg:hidden">
+			<div className="mb-3 flex items-center gap-2">
+				<span className="shrink-0 text-xs font-medium text-slate-500 dark:text-slate-400">{t('incidents.sortBy')}</span>
+				<Select aria-label={t('incidents.sortBy')} value={sort} onChange={(v) => onSortChange(v as SortKey)} options={sortOptions} className="min-w-40" />
+			</div>
+			<ul className={`flex flex-col ${listGap}`}>
+				{incidents.map((incident) => {
+					const selected = Boolean(rowSelection[incident.id]);
+					return (
+						<li key={incident.id} className={`rounded-xl border bg-white shadow-sm transition-shadow hover:shadow-md ${cardPad} dark:bg-slate-900 ${selected ? 'border-brand/40 bg-brand/5' : 'border-slate-200 dark:border-slate-800'}`}>
+							<div className="flex items-start justify-between gap-2">
+								<div className="flex min-w-0 items-start gap-2.5">
+									{isAdmin && (
+										<input
+											type="checkbox"
+											checked={selected}
+											onChange={() => onToggleSelect(incident.id)}
+											aria-label={t('incidents.selectRow', { title: incident.title })}
+											className="text-brand accent-brand mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-slate-300 focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-600"
+										/>
+									)}
+									<Link to={linkFor(`/incidents/${incident.id}`)} title={incident.title} className={`min-w-0 font-medium text-slate-900 hover:underline dark:text-slate-100 ${compact ? 'text-sm' : ''}`}>
+										{incident.title}
+									</Link>
+								</div>
+								{isAdmin && (
+									<ActionMenu
+										label={t('incidents.col.actions')}
+										items={[
+											{ key: 'edit', label: t('common.edit'), icon: <Pencil className="h-4 w-4" />, onSelect: () => onEdit(incident.id) },
+											{ key: 'delete', label: t('common.delete'), icon: <Trash2 className="h-4 w-4" />, destructive: true, onSelect: () => onDelete(incident.id) },
+										]}
+									/>
+								)}
+							</div>
+							<div className={`${sectionMt} flex flex-wrap items-center gap-2`}>
+								<StatusBadge status={incident.status} />
+								<PriorityBadge priority={incident.priority} />
+								{isOverdue(incident) && <OverdueBadge label={t('incidents.overdue')} />}
+							</div>
+							<div className={`${sectionMt} flex items-center justify-between text-xs text-slate-500 dark:text-slate-400`}>
+								<span>{incident.type}</span>
+								<span>{new Date(incident.createdAt).toLocaleDateString(i18n.resolvedLanguage)}</span>
+							</div>
+						</li>
+					);
+				})}
+			</ul>
+		</div>
 	);
 }
 

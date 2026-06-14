@@ -14,6 +14,7 @@ export async function createIncidentForUser(input: CreateIncidentInput, user: Au
 		type: input.type,
 		priority: input.priority,
 		description: input.description,
+		dueDate: input.dueDate ? new Date(input.dueDate) : undefined,
 		reporter: { connect: { id: user.id } },
 	});
 	emitIncidentsChanged();

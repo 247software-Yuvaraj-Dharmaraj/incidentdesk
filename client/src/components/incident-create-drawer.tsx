@@ -105,10 +105,29 @@ export function IncidentCreateDrawer({ onClose, onCreated }: { onClose: () => vo
 					</div>
 				)}
 
-				<div className="grid grid-cols-2 gap-4">
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 					<Controller name="type" control={control} render={({ field }) => <Select label={t('form.type')} options={toOptions(INCIDENT_TYPES)} value={field.value} onChange={field.onChange} />} />
 					<Controller name="priority" control={control} render={({ field }) => <Select label={t('form.priority')} options={toOptions(PRIORITIES)} value={field.value} onChange={field.onChange} />} />
 				</div>
+
+				<Controller
+					name="dueDate"
+					control={control}
+					render={({ field }) => (
+						<div className="flex flex-col gap-1">
+							<label htmlFor="dueDate" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+								{t('form.dueDate')}
+							</label>
+							<input
+								id="dueDate"
+								type="date"
+								value={field.value ? new Date(field.value).toISOString().slice(0, 10) : ''}
+								onChange={(e) => field.onChange(e.target.value ? new Date(`${e.target.value}T00:00:00`).toISOString() : undefined)}
+								className="cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-slate-700"
+							/>
+						</div>
+					)}
+				/>
 
 				<div className="flex flex-col gap-1">
 					<div className="flex items-center justify-between">

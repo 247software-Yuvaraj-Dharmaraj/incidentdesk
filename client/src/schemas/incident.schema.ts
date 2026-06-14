@@ -5,6 +5,7 @@ export const createIncidentSchema = z.object({
 	type: z.enum(['INCIDENT', 'REQUEST', 'MAINTENANCE']),
 	priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
 	description: z.string().max(2000).optional(),
+	dueDate: z.string().datetime().optional(),
 });
 
 export type CreateIncidentValues = z.infer<typeof createIncidentSchema>;
