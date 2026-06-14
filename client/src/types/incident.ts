@@ -31,7 +31,8 @@ export interface Incident {
 	type: IncidentType;
 	priority: Priority;
 	status: Status;
-	description: string | null;
+	// Omitted from list rows (the detail drawer refetches the full incident by id); present on detail.
+	description?: string | null;
 	dueDate: string | null;
 	resolvedAt: string | null;
 	reporter: UserPreview;

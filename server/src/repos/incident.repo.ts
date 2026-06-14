@@ -8,6 +8,25 @@ const incidentInclude = {
 	assignee: userPreview,
 } satisfies Prisma.IncidentInclude;
 
+// List rows never render `description` (a TEXT column up to 2000 chars) — the
+// detail drawer refetches the full incident by id. Select everything the list
+// uses and omit description to avoid over-fetching it on every page.
+const listSelect = {
+	id: true,
+	title: true,
+	type: true,
+	priority: true,
+	status: true,
+	dueDate: true,
+	resolvedAt: true,
+	reporterId: true,
+	assigneeId: true,
+	createdAt: true,
+	updatedAt: true,
+	reporter: userPreview,
+	assignee: userPreview,
+} satisfies Prisma.IncidentSelect;
+
 const detailInclude = {
 	reporter: userPreview,
 	assignee: userPreview,
@@ -74,7 +93,7 @@ export async function listIncidents({ where, cursor, limit }: ListArgs) {
 	const [rows, total] = await Promise.all([
 		prisma.incident.findMany({
 			where,
-			include: incidentInclude,
+			select: listSelect,
 			orderBy: { createdAt: 'desc' },
 			take: limit + 1,
 			...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
