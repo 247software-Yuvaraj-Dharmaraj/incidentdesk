@@ -11,5 +11,15 @@ export const loginSchema = z.object({
 	password: z.string().min(1, 'Password is required'),
 });
 
+export const preferencesSchema = z
+	.object({
+		theme: z.enum(['light', 'dark']).optional(),
+		density: z.enum(['comfortable', 'compact']).optional(),
+	})
+	.refine((d) => d.theme !== undefined || d.density !== undefined, {
+		message: 'At least one preference is required',
+	});
+
 export type SignupInput = z.infer<typeof signupSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type PreferencesInput = z.infer<typeof preferencesSchema>;

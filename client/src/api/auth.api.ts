@@ -34,3 +34,13 @@ export async function fetchMe(): Promise<User> {
 	const { data } = await http.get<AuthResponse>('/auth/me');
 	return data.user;
 }
+
+export interface PreferencesPayload {
+	theme?: 'light' | 'dark';
+	density?: 'comfortable' | 'compact';
+}
+
+export async function updatePreferences(payload: PreferencesPayload): Promise<User> {
+	const { data } = await http.patch<AuthResponse>('/auth/me/preferences', payload);
+	return data.user;
+}
